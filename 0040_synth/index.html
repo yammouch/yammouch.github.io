@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <script src="./node_modules/plotly.js-dist/plotly.js" charset="utf-8"></script>
+  <script type="module">
+   import { initSync, Source } from './node_modules/wasm_engine/reson.js';
+   //import { initSync, Source } from './sub01.js';
+   const audioContext = new AudioContext();
+
+   // refer to:
+   // https://www.youfit.co.jp/archives/1418
+   // https://qiita.com/optimisuke/items/f1434d4a46afd667adc6
+   function array2wav(ar) {
+     const sr = audioContext.sampleRate;
+     const v = new DataView(new ArrayBuffer(44 + 2*ar.length));
+     Array.from("RIFF", (c, i) => v.setUint8(i, c.charCodeAt(0)));
+     v.setUint32(4, 36 + 2*ar.length, true);
+     Array.from("WAVEfmt ", (c, i) => v.setUint8(8+i, c.charCodeAt(0)));
+     v.setUint32(16, 16, true);
+     v.setUint16(20, 1, true);
+     v.setUint16(22, 1, true);
+     v.setUint32(24, sr, true);
+     v.setUint32(28, sr*2, true);
+     v.setUint16(32, 2, true);
+     v.setUint16(34, 16, true);
+     Array.from("data", (c, i) => v.setUint8(36+i, c.charCodeAt(0)));
+     v.setUint32(40, 2*sr.length, true);
+     let i = 44;
+     ar.forEach( (x) => {
+       x *= 0x8000;
+       if (0x7fff <= x) {
+         x = 0x7fff;
+       } else if (x <= -0x8000) {
+         x = -0x8000;
+       }
+       v.setUint16(i, x, true);
+       i += 2;
+     });
+     return v.buffer;
+   }
+
+   async function main() {
+     const resp = await fetch("./node_modules/wasm_engine/reson_bg.wasm");
+     const buf = await resp.arrayBuffer();
+     const wasm = initSync(buf);
+     const sr = audioContext.sampleRate;
+     const sound_src = Source.new(440.0/sr);
+     sound_src.on(19);
+     sound_src.on(26);
+     sound_src.on(35);
+     let y = new Float32Array(sr);
+
+     sound_src.tick(sr);
+     const out_ptr = sound_src.ptr();
+     const f32view = new Float32Array(wasm.memory.buffer, out_ptr, sr);
+     y.set(f32view);
+
+     for (let i = 100; i < 105; i++) {
+       console.log(y[i]);
+     }
+
+     const polts = document.getElementById('plots');
+
+     const plotlen = 4000;
+     const waveform = document.createElement('div');
+     waveform.style = 'width:600px;height:250px';
+     plots.appendChild(waveform);
+     Plotly.newPlot
+     ( waveform
+     , [{ x: Array.from({length:plotlen}, (_, i) => i),
+          y: y.slice(0, plotlen) }]
+     , { margin: { t: 0 } } );
+
+     const wav = array2wav(y);
+     const blob = new Blob([wav], {type: 'audio/wav'});
+     const url = URL.createObjectURL(blob);
+     const audio = document.createElement('audio');
+     audio.src = url;
+     audio.controls = true;
+     const tone = document.getElementById("tone");
+     tone.appendChild(audio);
+   }
+
+   main();
+  </script>
+ </head>
+ <body>
+  <div id="tone"></div>
+  <div id="plots"></div>
+ </body>
+</html>

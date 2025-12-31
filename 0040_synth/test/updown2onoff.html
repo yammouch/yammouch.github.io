@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<script type="module">
+
+import { UpDown2OnOff, updown2note_build, note2onoff_build }
+ from "../updown2onoff.js";
+
+function objcmp(val, expc) {
+  val = JSON.stringify(val);
+  expc = JSON.stringify(expc);
+  let ret = "";
+
+  if (val === expc) {
+    ret += "[OK]\n";
+  } else {
+    ret += "[ER]\n";
+    ret += "result:\n";
+    ret += result + "\n";
+    ret += "expc:\n";
+    ret += expc + "\n";
+  }
+  return ret;
+}
+
+function test_main() {
+  const result = document.getElementById("result");
+  const o = new UpDown2OnOff();
+  result.innerText += "\n";
+  result.innerText += "test UpDown2OnOff\n";
+  result.innerText += objcmp(o.on ("KeyZ"  ), {cmd:"on" , note:4});
+  result.innerText += objcmp(o.on ("KeyZ"  ), undefined          );
+  result.innerText += objcmp(o.off("KeyZ"  ), {cmd:"off", note:4});
+  result.innerText += objcmp(o.on ("KeyZ"  ), {cmd:"on" , note:4});
+  result.innerText += objcmp(o.on ("Digit2"), {cmd:"on" , note:1});
+  result.innerText += objcmp(o.off("KeyZ"  ), {cmd:"off", note:4});
+  result.innerText += objcmp(o.off("Digit2"), {cmd:"off", note:1});
+}
+
+function test_main2() {
+  const notekey = [
+   ["KeyZ", "Digit3"],
+   ["KeyS"] ];
+  const result = document.getElementById("result");
+  result.innerText += "test update2note_build\n";
+
+  result.innerText +=
+   objcmp(updown2note_build(notekey), {"KeyZ": 0, "Digit3": 0, "KeyS": 1});
+}
+
+function test_main3() {
+  const notekey = [
+   ["KeyZ", "Digit3"],
+   ["KeyS"] ];
+  const result = document.getElementById("result");
+  result.innerText += "test note2onoff_build\n";
+
+  result.innerText +=
+   objcmp(note2onoff_build(notekey),
+    [{"KeyZ": false, "Digit3": false }, { "KeyS"  : false }] );
+}
+
+test_main();
+test_main2();
+test_main3();
+
+</script>
+
+</head>
+
+<body>
+<div id="result">Test result:</div>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "serve": "http-server -c-1"
+  },
+  "dependencies": {
+    "http-server"    : "^14.0.0",
+    "plotly.js-dist" : "~2.35.0"
+  }
+}

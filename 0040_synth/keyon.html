@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="module">
+
+import { UpDown2OnOff } from "./updown2onoff.js";
+
+const updown2onoff = new UpDown2OnOff();
+
+let audioContext;
+let squareNode = null;
+
+window.addEventListener("load", () => {
+  audioContext = new AudioContext();
+  const resume = document.getElementById("resume");
+  let cnt = 0;
+  resume.addEventListener("click", () => {
+    audioContext.resume().then( () => {
+      console.log('Playback resumed successfully');
+    });
+  });
+  document.addEventListener("keydown", (e) => {
+    let code;
+    if (e.key === "Shift" && e.code === "") {
+      code = "ShiftRight";
+    } else {
+      code = e.code;
+    }
+    let td = document.getElementById("td_" + code);
+    if (td) {
+      td.style.background = "#fcf";
+    }
+    let on = updown2onoff.on(code);
+    console.log(on);
+    if (on) {
+      console.log(code);
+      squareNode.port.postMessage(on);
+    }
+  });
+  document.addEventListener("keyup", (e) => {
+    let code;
+    if (e.key === "Shift" && e.code === "") {
+      code = "ShiftRight";
+    } else {
+      code = e.code;
+    }
+    let td = document.getElementById("td_" + code);
+    if (td) {
+      td.style.background = "#fff";
+    }
+    let off = updown2onoff.off(code);
+    if (off) {
+      squareNode.port.postMessage(off);
+    }
+  });
+  play();
+
+});
+
+function drawbar(port) {
+  const harm1 = document.getElementById("harm1");
+  harm1.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 0,
+      value : e.target.value
+    });
+  });
+
+  const harm2 = document.getElementById("harm2");
+  harm2.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 1,
+      value : e.target.value
+    });
+  });
+
+  const harm3 = document.getElementById("harm3");
+  harm3.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 2,
+      value : e.target.value
+    });
+  });
+
+  const harm4 = document.getElementById("harm4");
+  harm4.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 3,
+      value : e.target.value
+    });
+  });
+
+  const harm5 = document.getElementById("harm5");
+  harm5.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 4,
+      value : e.target.value
+    });
+  });
+
+  const harm6 = document.getElementById("harm6");
+  harm6.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 5,
+      value : e.target.value
+    });
+  });
+
+  const harm8 = document.getElementById("harm8");
+  harm8.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 6,
+      value : e.target.value
+    });
+  });
+
+  const harm9 = document.getElementById("harm9");
+  harm9.addEventListener("input", (e) => {
+    port.postMessage({
+      cmd   : "harm",
+      harm  : 7,
+      value : e.target.value
+    });
+  });
+}
+
+async function play() {
+  await audioContext.audioWorklet.addModule("keyon.js");
+  console.log("keyon");
+  const chord_root = document.getElementById("chord_root");
+  squareNode = new AudioWorkletNode(
+    audioContext,
+    "sq-pr",
+  );
+  let wasm = null;
+  const resp = await fetch("./engine/pkg/reson_bg.wasm");
+  if (resp.ok) {
+    wasm = await resp.arrayBuffer();
+  } else {
+    console.log("fetch failed");
+  }
+  squareNode.connect(audioContext.destination);
+  squareNode.port.onmessage = (e) => {
+    chord_root.innerText = "chord root: " + e.data.chord_root;
+  };
+  drawbar(squareNode.port);
+  squareNode.port.postMessage({
+   cmd       : "init",
+   sampleRate: audioContext.sampleRate,
+   master    : 440,
+   wasm      : wasm });
+}
+
+</script>
+<body>
+<button id="resume">resume</button>
+<table border="1">
+<tr>
+<td id="td_Digit1" colspan="2">1</td>
+<td id="td_Digit2" colspan="2">2</td>
+<td id="td_Digit3" colspan="2">3</td>
+<td id="td_Digit4" colspan="2">4</td>
+<td id="td_Digit5" colspan="2">5</td>
+<td id="td_Digit6" colspan="2">6</td>
+<td id="td_Digit7" colspan="2">7</td>
+<td id="td_Digit8" colspan="2">8</td>
+<td id="td_Digit9" colspan="2">9</td>
+<td id="td_Digit0" colspan="2">0</td>
+<td id="td_Minus" colspan="2">-</td>
+<td id="td_Equal" colspan="2">^</td>
+<td id="td_IntlYen" colspan="2">\</td>
+</tr>
+<tr>
+<td></td>
+<td id="td_KeyQ" colspan="2">Q</td>
+<td id="td_KeyW" colspan="2">W</td>
+<td id="td_KeyE" colspan="2">E</td>
+<td id="td_KeyR" colspan="2">R</td>
+<td id="td_KeyT" colspan="2">T</td>
+<td id="td_KeyY" colspan="2">Y</td>
+<td id="td_KeyU" colspan="2">U</td>
+<td id="td_KeyI" colspan="2">I</td>
+<td id="td_KeyO" colspan="2">O</td>
+<td id="td_KeyP" colspan="2">P</td>
+<td id="td_BracketLeft" colspan="2">@</td>
+<td id="td_BracketRight" colspan="2">[</td>
+</tr>
+<tr>
+<td colspan="2"></td>
+<td id="td_KeyA" colspan="2">A</td>
+<td id="td_KeyS" colspan="2">S</td>
+<td id="td_KeyD" colspan="2">D</td>
+<td id="td_KeyF" colspan="2">F</td>
+<td id="td_KeyG" colspan="2">G</td>
+<td id="td_KeyH" colspan="2">H</td>
+<td id="td_KeyJ" colspan="2">J</td>
+<td id="td_KeyK" colspan="2">K</td>
+<td id="td_KeyL" colspan="2">L</td>
+<td id="td_Semicolon" colspan="2">;</td>
+<td id="td_Quote" colspan="2">:</td>
+<td id="td_Backslash" colspan="2">]</td>
+</tr>
+<tr>
+<td id="td_ShiftLeft" colspan="3">Shift</td>
+<td id="td_KeyZ" colspan="2">Z</td>
+<td id="td_KeyX" colspan="2">X</td>
+<td id="td_KeyC" colspan="2">C</td>
+<td id="td_KeyV" colspan="2">V</td>
+<td id="td_KeyB" colspan="2">B</td>
+<td id="td_KeyN" colspan="2">N</td>
+<td id="td_KeyM" colspan="2">M</td>
+<td id="td_Comma" colspan="2">,</td>
+<td id="td_Period" colspan="2">.</td>
+<td id="td_Slash" colspan="2">/</td>
+<td id="td_IntlRo" colspan="2">\</td>
+<td id="td_ShiftRight" colspan="2">Shift</td>
+</tr>
+</table>
+
+<div id="chord_root">chord root:</div>
+
+<div>
+  <input type="range" id="harm1" name="harm1" min="0" max="8" value="8" />
+  <label for="harm1">8'</label>
+</div>
+
+<div>
+  <input type="range" id="harm2" name="harm2" min="0" max="8" value="8" />
+  <label for="harm2">4'</label>
+</div>
+
+<div>
+  <input type="range" id="harm3" name="harm3" min="0" max="8" value="8" />
+  <label for="harm3">2 2/3'</label>
+</div>
+
+<div>
+  <input type="range" id="harm4" name="harm4" min="0" max="8" value="8" />
+  <label for="harm4">2'</label>
+</div>
+
+<div>
+  <input type="range" id="harm5" name="harm5" min="0" max="8" value="8" />
+  <label for="harm5">1 3/5'</label>
+</div>
+
+<div>
+  <input type="range" id="harm6" name="harm6" min="0" max="8" value="8" />
+  <label for="harm6">1 1/3'</label>
+</div>
+
+<div>
+  <input type="range" id="harm8" name="harm8" min="0" max="8" value="8" />
+  <label for="harm8">1'</label>
+</div>
+
+<div>
+  <input type="range" id="harm9" name="harm9" min="0" max="8" value="8" />
+  <label for="harm9">8/9'</label>
+</div>
+
+</body>
+</html>
