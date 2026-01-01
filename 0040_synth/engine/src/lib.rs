@@ -364,6 +364,51 @@ impl Exc {
   }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+struct Exc_new {
+  a  : Vec<Vec<Exc1_new>>,
+  exi: Vec<Vec<(usize, usize)>>,
+}
+
+impl Exc_new {
+  fn new(nk: usize, cfg: &[usize]) -> Self {
+    let mx = cfg.iter().max().expect("empty array").clone();
+    let mut a = vec![ Vec::<Exc1_new>::new(); nk+mx ];
+    for &c in cfg {
+      for i in 0..nk {
+        a[c+i].push( Exc1_new {
+          n: 0,
+          v: vec![Cplxpol {mag: 1.0, angle: 0.0}]
+        });
+      }
+    }
+    Self { a,
+           exi: k2r(nk, cfg) }
+  }
+  fn tick(&mut self, dst: &mut [Cplxpol]) {
+    for i in 0..dst.len() {
+      let mut c = Cplxpol { mag: 0.0, angle: 0.0 };
+      for e in &mut self.a[i] {
+        c += e.next().unwrap();
+      }
+      if c.mag != 0.0 {
+        dst[i] += c;
+      }
+    }
+  }
+  fn on(&mut self, i: usize) {
+    for &t in self.exi[i].iter() {
+      self.a[t.0][t.1].n = self.a[t.0][t.1].v.len();
+    }
+  }
+  fn harm(&mut self, i: usize, mag: f64) {
+    for v in &self.exi {
+      let (i0, i1) = v[i];
+      self.a[i0][i1].v[0].mag = mag;
+    }
+  }
+}
+
 #[cfg(test)]
 mod cplxpol_test {
   use wasm_bindgen_test::*;
