@@ -35,10 +35,18 @@ pub fn angle_regu(angle: f64) -> f64 {
   angle - ((angle+pi)/(2.*pi)).floor()*(2.*pi)
 }
 
-impl Add for Cplxpol {
+impl From<f64> for Cplxpol {
+  fn from(x: f64) -> Self {
+    Self { mag: x, angle: 0.0 }
+  }
+}
+
+impl<T> Add<T> for Cplxpol where
+ T: Into<Cplxpol> {
   type Output = Self;
 
-  fn add(self, other: Self) -> Self {
+  fn add(self, other: T) -> Self {
+    let other = other.into();
     let diff_angle = other.angle - self.angle;
     let mag = ( self.mag*self.mag + other.mag*other.mag
               + 2.*self.mag*other.mag*diff_angle.cos() )
@@ -49,37 +57,28 @@ impl Add for Cplxpol {
   }
 }
 
-impl Add<f64> for Cplxpol {
+impl<T> AddAssign<T> for Cplxpol where
+ T: Into<Cplxpol> {
+  fn add_assign(&mut self, other: T) {
+    *self = self.clone() + other.into();
+  }
+}
+
+impl<T> Mul<T> for Cplxpol where
+ T: Into<Cplxpol> {
   type Output = Self;
 
-  fn add(self, other: f64) -> Self {
-    self + Cplxpol { mag: other, angle: 0. }
-  }
-}
-
-impl AddAssign for Cplxpol {
-  fn add_assign(&mut self, other: Self) {
-    *self = self.clone() + other;
-  }
-}
-
-impl AddAssign<f64> for Cplxpol {
-  fn add_assign(&mut self, other: f64) {
-    *self = self.clone() + other;
-  }
-}
-
-impl Mul for Cplxpol {
-  type Output = Self;
-
-  fn mul(self, other: Self) -> Self {
+  fn mul(self, other: T) -> Self {
+    let other = other.into();
     let mag = self.mag*other.mag;
     Self { mag: mag, angle: angle_regu(self.angle + other.angle) }
   }
 }
 
-impl MulAssign for Cplxpol {
-  fn mul_assign(&mut self, other: Self) {
+impl<T> MulAssign<T> for Cplxpol where
+ T: Into<Cplxpol> {
+  fn mul_assign(&mut self, other: T) {
+    let other = other.into();
     *self = self.clone() * other;
   }
 }
