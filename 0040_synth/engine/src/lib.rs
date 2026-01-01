@@ -306,6 +306,25 @@ impl Iterator for Exc1 {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+struct Exc1_new {
+  n: usize,
+  v: Vec<Cplxpol>,
+}
+
+impl Iterator for Exc1_new {
+  type Item = Cplxpol;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if 0 < self.n {
+      self.n -= 1;
+      Some(self.v[self.n])
+    } else {
+      Some(Cplxpol { mag: 0.0, angle: 0.0 })
+    }
+  }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 struct Exc {
   a  : Vec<Exc1>,
   exi: Vec<Vec<(usize, usize)>>,
