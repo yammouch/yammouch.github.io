@@ -149,7 +149,7 @@ const JUST_TABLE : [f64; 12] = [
 pub struct Source {
   v  : Vec<f32>,
   mst: f64,
-  exc: Exc_new,
+  exc: Exc,
   rsn: Rsn,
   stt: Vec<Cplxpol>,
   eqt: Vec<f64>,
@@ -165,7 +165,7 @@ impl Source {
     let mut slf = Self {
       v: Vec::with_capacity(128),
       mst: f_master_a,
-      exc: Exc_new::new(nk, &cfg),
+      exc: Exc::new(nk, &cfg),
       rsn: Rsn::new(nk, &cfg),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
@@ -285,12 +285,12 @@ impl Rsn {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Exc1_new {
+struct Exc1 {
   n: usize,
   v: Vec<Cplxpol>,
 }
 
-impl Iterator for Exc1_new {
+impl Iterator for Exc1 {
   type Item = Cplxpol;
 
   fn next(&mut self) -> Option<Self::Item> {
@@ -304,18 +304,18 @@ impl Iterator for Exc1_new {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Exc_new {
-  a  : Vec<Vec<Exc1_new>>,
+struct Exc {
+  a  : Vec<Vec<Exc1>>,
   exi: Vec<Vec<(usize, usize)>>,
 }
 
-impl Exc_new {
+impl Exc {
   fn new(nk: usize, cfg: &[usize]) -> Self {
     let mx = cfg.iter().max().expect("empty array").clone();
-    let mut a = vec![ Vec::<Exc1_new>::new(); nk+mx ];
+    let mut a = vec![ Vec::<Exc1>::new(); nk+mx ];
     for &c in cfg {
       for i in 0..nk {
-        a[c+i].push( Exc1_new {
+        a[c+i].push( Exc1 {
           n: 0,
           v: vec![Cplxpol {mag: 1.0, angle: 0.0}]
         });
@@ -588,11 +588,11 @@ mod test_vecreson {
   }
 
   #[wasm_bindgen_test(unsupported = test)]
-  fn test_exc1_new() {
+  fn test_exc1() {
     use super::Cplxpol;
-    use super::Exc1_new;
+    use super::Exc1;
 
-    let mut exc1 = Exc1_new {
+    let mut exc1 = Exc1 {
       n: 2,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
@@ -600,7 +600,7 @@ mod test_vecreson {
 
     let e = exc1.next().unwrap();
     assert_eq!(e, Cplxpol { mag: 0.5, angle: 0.0 } );
-    assert_eq!(exc1, Exc1_new {
+    assert_eq!(exc1, Exc1 {
       n: 1,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
@@ -608,7 +608,7 @@ mod test_vecreson {
 
     let e = exc1.next().unwrap();
     assert_eq!(e, Cplxpol { mag: 1.0, angle: 0.0 });
-    assert_eq!(exc1, Exc1_new {
+    assert_eq!(exc1, Exc1 {
       n: 0,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
@@ -616,21 +616,21 @@ mod test_vecreson {
   }
 
   #[wasm_bindgen_test(unsupported = test)]
-  fn test_exc_new() {
+  fn test_exc() {
     use super::Cplxpol;
-    use super::Exc1_new;
-    use super::Exc_new;
-    let mut exc = Exc_new {
+    use super::Exc1;
+    use super::Exc;
+    let mut exc = Exc {
       a  : vec![
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
       ],
@@ -638,17 +638,17 @@ mod test_vecreson {
                 vec![(1, 0)]],
     };
     exc.on(0);
-    assert_eq!(exc, Exc_new {
+    assert_eq!(exc, Exc {
       a  : vec![
         vec![
-          Exc1_new {
+          Exc1 {
             n: 1,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
-          Exc1_new {
+          Exc1 {
             n: 1,
             v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
       ],
@@ -661,17 +661,17 @@ mod test_vecreson {
     assert_eq!(o,
      vec![Cplxpol { mag: 1.0, angle: 0.0 },
           Cplxpol { mag: 1.5, angle: 0.0 }] );
-    assert_eq!(exc, Exc_new {
+    assert_eq!(exc, Exc {
       a  : vec![
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
       ],
@@ -681,21 +681,21 @@ mod test_vecreson {
   }
 
   #[wasm_bindgen_test(unsupported = test)]
-  fn test_exc_new_harm() {
+  fn test_exc_harm() {
     use super::Cplxpol;
-    use super::Exc1_new;
-    use super::Exc_new;
-    let mut exc = Exc_new {
+    use super::Exc1;
+    use super::Exc;
+    let mut exc = Exc {
       a  : vec![
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
       ],
@@ -703,17 +703,17 @@ mod test_vecreson {
                 vec![(1, 0)]],
     };
     exc.harm(0, 0.75);
-    assert_eq!(exc, Exc_new {
+    assert_eq!(exc, Exc {
       a  : vec![
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] }],
         vec![
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] },
-          Exc1_new {
+          Exc1 {
             n: 0,
             v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
       ],
