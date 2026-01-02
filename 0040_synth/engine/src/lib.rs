@@ -149,7 +149,7 @@ const JUST_TABLE : [f64; 12] = [
 pub struct Source {
   v  : Vec<f32>,
   mst: f64,
-  exc: Exc,
+  exc: Exc_new,
   rsn: Rsn,
   stt: Vec<Cplxpol>,
   eqt: Vec<f64>,
@@ -165,7 +165,7 @@ impl Source {
     let mut slf = Self {
       v: Vec::with_capacity(128),
       mst: f_master_a,
-      exc: Exc::new(nk, &cfg),
+      exc: Exc_new::new(nk, &cfg),
       rsn: Rsn::new(nk, &cfg),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
