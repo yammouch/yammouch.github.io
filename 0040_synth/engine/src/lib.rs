@@ -869,4 +869,46 @@ mod test_vecreson {
                 vec![(1, 0)]],
     });
   }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_exc_new_harm() {
+    use super::Cplxpol;
+    use super::Exc1_new;
+    use super::Exc_new;
+    let mut exc = Exc_new {
+      a  : vec![
+        vec![
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
+        vec![
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+      ],
+      exi: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+    };
+    exc.harm(0, 0.75);
+    assert_eq!(exc, Exc_new {
+      a  : vec![
+        vec![
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] }],
+        vec![
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] },
+          Exc1_new {
+            n: 0,
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+      ],
+      exi: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+    });
+  }
 }
