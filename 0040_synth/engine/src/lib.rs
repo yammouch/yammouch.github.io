@@ -251,10 +251,10 @@ impl Rsn {
       }
     }
     Self {
-      c  : vec![Cplxpol { mag: 1. - 1e-1, angle: 0.0 }; nk+mx],
+      c  : vec![Cplxpol { mag: 1. - 1e-2, angle: 0.0 }; nk+mx],
       lim: vec![10.0; nk+mx],
       dcn: vec![1. - 1e-4; nk+mx],
-      dcf: vec![1. - 1e-1; nk+mx],
+      dcf: vec![1. - 1e-2; nk+mx],
       k2r: k2r(nk, cfg),
       prs,
       pr1: vec![false; nk],
