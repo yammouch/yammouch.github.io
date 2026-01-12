@@ -288,6 +288,7 @@ impl Rsn {
 struct Exc1 {
   n: usize,
   v: Vec<Cplxpol>,
+  a: f64,
 }
 
 impl Iterator for Exc1 {
@@ -317,7 +318,8 @@ impl Exc {
       for i in 0..nk {
         a[c+i].push( Exc1 {
           n: 0,
-          v: vec![Cplxpol {mag: 1.0, angle: 0.0}]
+          v: vec![Cplxpol {mag: 1.0, angle: 0.0}],
+          a: 1.0,
         });
       }
     }
@@ -596,6 +598,7 @@ mod test_vecreson {
       n: 2,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
+      a: 1.0,
     };
 
     let e = exc1.next().unwrap();
@@ -604,6 +607,7 @@ mod test_vecreson {
       n: 1,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
+      a: 1.0,
     });
 
     let e = exc1.next().unwrap();
@@ -612,6 +616,7 @@ mod test_vecreson {
       n: 0,
       v: vec![ Cplxpol { mag: 1.0, angle: 0.0 },
                Cplxpol { mag: 0.5, angle: 0.0 } ],
+      a: 1.0,
     });
   }
 
@@ -625,14 +630,20 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          },
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ],
+            a: 1.0,
+          }],
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
@@ -643,14 +654,20 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 1,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          },
           Exc1 {
             n: 1,
-            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ],
+            a: 1.0,
+          }],
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
@@ -666,14 +683,20 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          },
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ],
+            a: 1.0,
+          }],
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
@@ -690,14 +713,20 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ] },
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 1.0,
+          },
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ],
+            a: 1.0,
+          }],
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
@@ -708,14 +737,20 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ],
+            a: 1.0,
+          }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ] },
+            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ],
+            a: 1.0,
+          },
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ] }],
+            v: vec![ Cplxpol { mag: 0.5, angle: 0.0 } ],
+            a: 1.0,
+          }],
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
