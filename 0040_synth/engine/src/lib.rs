@@ -345,7 +345,7 @@ impl Exc {
   fn harm(&mut self, i: usize, mag: f64) {
     for v in &self.exi {
       let (i0, i1) = v[i];
-      self.a[i0][i1].v[0].mag = mag;
+      self.a[i0][i1].a = mag;
     }
   }
 }
@@ -737,14 +737,14 @@ mod test_vecreson {
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ],
-            a: 1.0,
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 0.75,
           }],
         vec![
           Exc1 {
             n: 0,
-            v: vec![ Cplxpol { mag: 0.75, angle: 0.0 } ],
-            a: 1.0,
+            v: vec![ Cplxpol { mag: 1.0, angle: 0.0 } ],
+            a: 0.75,
           },
           Exc1 {
             n: 0,
