@@ -297,7 +297,7 @@ impl Iterator for Exc1 {
   fn next(&mut self) -> Option<Self::Item> {
     if 0 < self.n {
       self.n -= 1;
-      Some(self.v[self.n])
+      Some(self.v[self.n] * self.a)
     } else {
       Some(Cplxpol { mag: 0.0, angle: 0.0 })
     }
