@@ -165,7 +165,7 @@ impl Source {
     let mut slf = Self {
       v: Vec::with_capacity(128),
       mst: f_master_a,
-      exc: Exc::new(nk, &cfg),
+      exc: Exc::new(nk, &cfg, f_master_a),
       rsn: Rsn::new(nk, &cfg),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
@@ -311,14 +311,16 @@ struct Exc {
 }
 
 impl Exc {
-  fn new(nk: usize, cfg: &[usize]) -> Self {
+  fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut a = vec![ Vec::<Exc1>::new(); nk+mx ];
     for &c in cfg {
       for i in 0..nk {
+        let f = f_master_a*2f64.powf(((c + i) as f64 - 33.0)/12.0);
         a[c+i].push( Exc1 {
           n: 0,
-          v: vec![Cplxpol {mag: 1.0, angle: 0.0}],
+          v: vec![Cplxpol {mag: f/0.5, angle: 0.0};
+                  (0.5/f).round_ties_even() as usize],
           a: 1.0,
         });
       }
