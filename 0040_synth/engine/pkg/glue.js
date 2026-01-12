@@ -52,6 +52,19 @@ export class Source {
         wasm.__wbg_source_free(ptr, 0);
     }
     /**
+     * @param {number} i
+     */
+    on(i) {
+        wasm.source_on(this.__wbg_ptr, i);
+    }
+    /**
+     * @returns {number}
+     */
+    crt() {
+        const ret = wasm.source_crt(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
      * @param {number} f_master_a
      * @returns {Source}
      */
@@ -66,29 +79,10 @@ export class Source {
         wasm.source_off(this.__wbg_ptr, i);
     }
     /**
-     * @param {number} i
-     */
-    on(i) {
-        wasm.source_on(this.__wbg_ptr, i);
-    }
-    /**
-     * @param {number} n
-     */
-    tick(n) {
-        wasm.source_tick(this.__wbg_ptr, n);
-    }
-    /**
      * @returns {number}
      */
     ptr() {
         const ret = wasm.source_ptr(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * @returns {number}
-     */
-    crt() {
-        const ret = wasm.source_crt(this.__wbg_ptr);
         return ret >>> 0;
     }
     /**
@@ -97,6 +91,12 @@ export class Source {
      */
     harm(h, mag) {
         wasm.source_harm(this.__wbg_ptr, h, mag);
+    }
+    /**
+     * @param {number} n
+     */
+    tick(n) {
+        wasm.source_tick(this.__wbg_ptr, n);
     }
 }
 if (Symbol.dispose) Source.prototype[Symbol.dispose] = Source.prototype.free;
