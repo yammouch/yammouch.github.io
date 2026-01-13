@@ -135,7 +135,7 @@ const JUST_TABLE : [f64; 12] = [
   9.0/ 8.0,
   6.0/ 5.0, //  7.0/ 6.0
   5.0/ 4.0,
-  4.0/ 3.0,
+ 27.0/20.0, //  4.0/ 3.0
  45.0/32.0, // 11.0/ 8.0
   3.0/ 2.0,
  25.0/16.0, //  8.0/ 5.0
@@ -187,7 +187,7 @@ impl Source {
     self.exc.on(i);
     if let Some(k) = chord_root(&self.rsn.pr1) {
       self.crt = k;
-      tune(&mut self.rsn.c, 21+k as isize, pi * self.mst * self.eqt[k], &JUST_TABLE);
+      tune(&mut self.rsn.c, 24+k as isize, pi * self.mst * self.eqt[k] * self.eqt[3], &JUST_TABLE);
     } else {
       self.crt = 12;
       tune(&mut self.rsn.c, 33, tau * self.mst, &self.eqt);
