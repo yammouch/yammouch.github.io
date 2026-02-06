@@ -239,6 +239,7 @@ struct Rsn {
   k2r: Vec<Vec<(usize, usize)>>,
   prs: Vec<Vec<bool>>,
   pr1: Vec<bool>,
+  drb: [f64; 8],
 }
 
 impl Rsn {
@@ -258,6 +259,7 @@ impl Rsn {
       k2r: k2r(nk, cfg),
       prs,
       pr1: vec![false; nk],
+      drb: [1.0; 8],
     }
   }
   fn tick(&self, dst: &mut [Cplxpol]) {
@@ -523,6 +525,7 @@ mod test_vecreson {
       prs: vec![vec![false],
                 vec![false, false]],
       pr1: vec![false, false],
+      drb: [1.0; 8],
     };
 
     rsn.on(0);
@@ -537,6 +540,7 @@ mod test_vecreson {
       prs: vec![vec![true],
                 vec![false, true]],
       pr1: vec![true, false],
+      drb: [1.0; 8],
     });
 
     let mut v = vec![Cplxpol { mag: 1.0, angle: 0.0 },
@@ -559,6 +563,7 @@ mod test_vecreson {
       prs: vec![vec![true],
                 vec![true, true]],
       pr1: vec![true, true],
+      drb: [1.0; 8],
     });
 
     rsn.off(0);
@@ -573,6 +578,7 @@ mod test_vecreson {
       prs: vec![vec![false],
                 vec![true, false]],
       pr1: vec![false, true],
+      drb: [1.0; 8],
     });
 
     rsn.off(1);
@@ -587,6 +593,7 @@ mod test_vecreson {
       prs: vec![vec![false],
                 vec![false, false]],
       pr1: vec![false, false],
+      drb: [1.0; 8],
     });
   }
 
