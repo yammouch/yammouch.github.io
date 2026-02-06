@@ -214,6 +214,7 @@ impl Source {
 
   pub fn harm(&mut self, h: usize, mag: f64) {
     self.exc.harm(h, mag);
+    self.rsn.harm(h, mag);
   }
 }
 
@@ -269,9 +270,11 @@ impl Rsn {
     }
   }
   fn on(&mut self, i: usize) {
-    for &t in self.k2r[i].iter() {
-      self.prs[t.0][t.1] = true;
-      self.c[t.0].mag = self.dcn[t.0];
+    for (&t, d) in self.k2r[i].iter().zip(self.drb) {
+      if d != 0.0 {
+        self.prs[t.0][t.1] = true;
+        self.c[t.0].mag = self.dcn[t.0];
+      }
     }
     self.pr1[i] = true;
   }
@@ -283,6 +286,17 @@ impl Rsn {
       }
     }
     self.pr1[i] = false;
+  }
+  fn harm(&mut self, h: usize, mag: f64) {
+    self.drb[h] = mag;
+    if mag == 0.0 {
+      for &t in self.k2r.iter().filter_map( |s| s.get(h) ) {
+        self.prs[t.0][t.1] = false;
+        if self.prs[t.0].iter().all( |&x| x == false ) {
+          self.c[t.0].mag = self.dcf[t.0];
+        }
+      }
+    }
   }
 }
 
@@ -594,6 +608,71 @@ mod test_vecreson {
                 vec![false, false]],
       pr1: vec![false, false],
       drb: [1.0; 8],
+    });
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_rsn_harm() {
+    use super::Cplxpol;
+    use super::Rsn;
+
+    let mut rsn = Rsn {
+      c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
+                Cplxpol { mag: 0.75, angle: 0.5  }],
+      lim: vec![1.0 , 1.0 ],
+      dcn: vec![0.5 , 1.5 ],
+      dcf: vec![0.25, 0.75],
+      k2r: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+      prs: vec![vec![false],
+                vec![false, false]],
+      pr1: vec![false, false],
+      drb: [1.0; 8],
+    };
+
+    rsn.on(0);
+    assert_eq!(rsn, Rsn {
+      c  : vec![Cplxpol { mag: 0.5, angle: 0.25 },
+                Cplxpol { mag: 1.5, angle: 0.5  }],
+      lim: vec![1.0 , 1.0 ],
+      dcn: vec![0.5 , 1.5 ],
+      dcf: vec![0.25, 0.75],
+      k2r: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+      prs: vec![vec![true],
+                vec![false, true]],
+      pr1: vec![true, false],
+      drb: [1.0; 8],
+    });
+
+    rsn.harm(1, 0.0);
+    assert_eq!(rsn, Rsn {
+      c  : vec![Cplxpol { mag: 0.5 , angle: 0.25 },
+                Cplxpol { mag: 0.75, angle: 0.5  }],
+      lim: vec![1.0 , 1.0 ],
+      dcn: vec![0.5 , 1.5 ],
+      dcf: vec![0.25, 0.75],
+      k2r: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+      prs: vec![vec![true],
+                vec![false, false]],
+      pr1: vec![true, false],
+      drb: [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    });
+
+    rsn.on(0);
+    assert_eq!(rsn, Rsn {
+      c  : vec![Cplxpol { mag: 0.5 , angle: 0.25 },
+                Cplxpol { mag: 0.75, angle: 0.5  }],
+      lim: vec![1.0 , 1.0 ],
+      dcn: vec![0.5 , 1.5 ],
+      dcf: vec![0.25, 0.75],
+      k2r: vec![vec![(0, 0), (1, 1)],
+                vec![(1, 0)]],
+      prs: vec![vec![true],
+                vec![false, false]],
+      pr1: vec![true, false],
+      drb: [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
     });
   }
 
