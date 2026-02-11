@@ -153,7 +153,6 @@ pub struct Source {
   rsn: Rsn,
   stt: Vec<Cplxpol>,
   eqt: Vec<f64>,
-  crt: usize,
 }
 
 #[wasm_bindgen]
@@ -169,7 +168,6 @@ impl Source {
       rsn: Rsn::new(nk, &cfg),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
-      crt: 0,
     };
     let tau = std::f64::consts::TAU;
     tune(&mut slf.rsn.c, 33, tau * f_master_a, &slf.eqt);
@@ -186,10 +184,10 @@ impl Source {
     self.rsn.on(i);
     self.exc.on(i);
     if let Some(k) = chord_root(&self.rsn.pr1) {
-      self.crt = k;
+      self.rsn.crt = k;
       tune(&mut self.rsn.c, 24+k as isize, pi * self.mst * self.eqt[k] * self.eqt[3], &JUST_TABLE);
     } else {
-      self.crt = 12;
+      self.rsn.crt = 12;
       tune(&mut self.rsn.c, 33, tau * self.mst, &self.eqt);
     }
   }
@@ -209,7 +207,7 @@ impl Source {
   }
 
   pub fn crt(&self) -> usize {
-    self.crt
+    self.rsn.crt
   }
 
   pub fn harm(&mut self, h: usize, mag: f64) {
@@ -241,6 +239,7 @@ struct Rsn {
   prs: Vec<Vec<bool>>,
   pr1: Vec<bool>,
   drb: [f64; 8],
+  crt: usize,
 }
 
 impl Rsn {
@@ -261,6 +260,7 @@ impl Rsn {
       prs,
       pr1: vec![false; nk],
       drb: [1.0; 8],
+      crt: 0,
     }
   }
   fn tick(&self, dst: &mut [Cplxpol]) {
@@ -540,22 +540,17 @@ mod test_vecreson {
                 vec![false, false]],
       pr1: vec![false, false],
       drb: [1.0; 8],
+      crt: 0,
     };
 
     rsn.on(0);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.5, angle: 0.25 },
-                Cplxpol { mag: 1.5, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![true],
-                vec![false, true]],
-      pr1: vec![true, false],
-      drb: [1.0; 8],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.5, angle: 0.25 },
+           Cplxpol { mag: 1.5, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![true],
+           vec![false, true]]);
+    assert_eq!(rsn.pr1, vec![true, false]);
 
     let mut v = vec![Cplxpol { mag: 1.0, angle: 0.0 },
                      Cplxpol { mag: 1.0, angle: 0.0 }];
@@ -566,49 +561,31 @@ mod test_vecreson {
     ]);
 
     rsn.on(1);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.5, angle: 0.25 },
-                Cplxpol { mag: 1.5, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![true],
-                vec![true, true]],
-      pr1: vec![true, true],
-      drb: [1.0; 8],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.5, angle: 0.25 },
+           Cplxpol { mag: 1.5, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![true],
+           vec![true, true]]);
+    assert_eq!(rsn.pr1, vec![true, true]);
 
     rsn.off(0);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
-                Cplxpol { mag: 1.5 , angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![false],
-                vec![true, false]],
-      pr1: vec![false, true],
-      drb: [1.0; 8],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.25, angle: 0.25 },
+           Cplxpol { mag: 1.5 , angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![false],
+           vec![true, false]]);
+    assert_eq!(rsn.pr1, vec![false, true]);
 
     rsn.off(1);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
-                Cplxpol { mag: 0.75, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![false],
-                vec![false, false]],
-      pr1: vec![false, false],
-      drb: [1.0; 8],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.25, angle: 0.25 },
+           Cplxpol { mag: 0.75, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![false],
+           vec![false, false]]);
+    assert_eq!(rsn.pr1, vec![false, false]);
   }
 
   #[wasm_bindgen_test(unsupported = test)]
@@ -628,52 +605,37 @@ mod test_vecreson {
                 vec![false, false]],
       pr1: vec![false, false],
       drb: [1.0; 8],
+      crt: 0,
     };
 
     rsn.on(0);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.5, angle: 0.25 },
-                Cplxpol { mag: 1.5, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![true],
-                vec![false, true]],
-      pr1: vec![true, false],
-      drb: [1.0; 8],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.5, angle: 0.25 },
+           Cplxpol { mag: 1.5, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![true],
+           vec![false, true]]);
+    assert_eq!(rsn.pr1, vec![true, false]);
 
     rsn.harm(1, 0.0);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.5 , angle: 0.25 },
-                Cplxpol { mag: 0.75, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![true],
-                vec![false, false]],
-      pr1: vec![true, false],
-      drb: [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.5 , angle: 0.25 },
+           Cplxpol { mag: 0.75, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![true],
+           vec![false, false]]);
+    assert_eq!(rsn.pr1, vec![true, false]);
+    assert_eq!(rsn.drb, [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
 
     rsn.on(0);
-    assert_eq!(rsn, Rsn {
-      c  : vec![Cplxpol { mag: 0.5 , angle: 0.25 },
-                Cplxpol { mag: 0.75, angle: 0.5  }],
-      lim: vec![1.0 , 1.0 ],
-      dcn: vec![0.5 , 1.5 ],
-      dcf: vec![0.25, 0.75],
-      k2r: vec![vec![(0, 0), (1, 1)],
-                vec![(1, 0)]],
-      prs: vec![vec![true],
-                vec![false, false]],
-      pr1: vec![true, false],
-      drb: [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-    });
+    assert_eq!(rsn.c,
+      vec![Cplxpol { mag: 0.5 , angle: 0.25 },
+           Cplxpol { mag: 0.75, angle: 0.5  }]);
+    assert_eq!(rsn.prs,
+      vec![vec![true],
+           vec![false, false]]);
+    assert_eq!(rsn.pr1, vec![true, false]);
+    assert_eq!(rsn.drb, [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
   }
 
   #[wasm_bindgen_test(unsupported = test)]
