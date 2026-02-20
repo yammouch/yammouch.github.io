@@ -240,6 +240,7 @@ struct Rsn {
   pr1: Vec<bool>,
   drb: [f64; 8],
   crt: usize,
+  ftb: Vec<Vec<Cplxpol>>,
 }
 
 impl Rsn {
@@ -261,6 +262,7 @@ impl Rsn {
       pr1: vec![false; nk],
       drb: [1.0; 8],
       crt: 0,
+      ftb: vec![vec![]; 13],
     }
   }
   fn tick(&self, dst: &mut [Cplxpol]) {
@@ -541,6 +543,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
+      ftb: vec![vec![]; 13],
     };
 
     rsn.on(0);
@@ -606,6 +609,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
+      ftb: vec![vec![]; 13],
     };
 
     rsn.on(0);
