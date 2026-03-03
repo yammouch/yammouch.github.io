@@ -165,7 +165,7 @@ impl Source {
       v: Vec::with_capacity(128),
       mst: f_master_a,
       exc: Exc::new(nk, &cfg, f_master_a),
-      rsn: Rsn::new(nk, &cfg),
+      rsn: Rsn::new(nk, &cfg, f_master_a),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
     };
@@ -244,13 +244,25 @@ struct Rsn {
 }
 
 impl Rsn {
-  fn new(nk: usize, cfg: &[usize]) -> Self {
+  fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
+    let pi = std::f64::consts::PI;
+    let tau = std::f64::consts::TAU;
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut prs = vec![vec![]; nk+mx];
     for &c in cfg {
       for i in 0..nk {
         prs[c+i].push(false);
       }
+    }
+    let mut ftb = vec![vec![0f64.into(); 13]; 13];
+    let eqt = (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect::<Vec<_>>();
+    tune(&mut ftb[12], 33, tau * f_master_a, &eqt);
+    for i in 0..12 {
+      tune(
+       &mut ftb[i],
+       24+i as isize,
+       pi * f_master_a * 2f64.powf(((i+3) as f64)/12.),
+       &JUST_TABLE);
     }
     Self {
       c  : vec![Cplxpol { mag: 1. - 1e-2, angle: 0.0 }; nk+mx],
@@ -261,8 +273,8 @@ impl Rsn {
       prs,
       pr1: vec![false; nk],
       drb: [1.0; 8],
-      crt: 0,
-      ftb: vec![vec![]; 13],
+      crt: 12,
+      ftb,
     }
   }
   fn tick(&self, dst: &mut [Cplxpol]) {
