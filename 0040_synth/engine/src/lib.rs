@@ -220,6 +220,7 @@ fn k2r(nk: usize, cfg: &[usize]) -> Vec<Vec<(usize, usize)>> {
 struct Rsn {
   c  : Vec<Cplxpol>,
   lim: Vec<f64>,
+  atv: Vec<bool>,
   dcn: Vec<f64>,
   dcf: Vec<f64>,
   k2r: Vec<Vec<(usize, usize)>>,
@@ -254,6 +255,7 @@ impl Rsn {
     Self {
       c  : vec![Cplxpol { mag: 1. - 1e-2, angle: 0.0 }; nk+mx],
       lim: vec![10.0; nk+mx],
+      atv: vec![false; nk+mx],
       dcn: vec![1. - 1e-4; nk+mx],
       dcf: vec![1. - 1e-2; nk+mx],
       k2r: k2r(nk, cfg),
@@ -274,7 +276,7 @@ impl Rsn {
     for (&t, d) in self.k2r[i].iter().zip(self.drb) {
       if d != 0.0 {
         self.prs[t.0][t.1] = true;
-        self.c[t.0].mag = self.dcn[t.0];
+        self.atv[t.0] = true;
       }
     }
     self.pr1[i] = true;
@@ -284,14 +286,16 @@ impl Rsn {
       self.crt = 12;
     }
     for i in 0..self.c.len() {
-      self.c[i].angle = self.ftb[self.crt][i].angle;
+      let dcy = if self.atv[i] { self.dcn[i] } else { self.dcf[i] };
+      self.c[i] = self.ftb[self.crt][i] * dcy;
     }
   }
   fn off(&mut self, i: usize) {
     for &t in self.k2r[i].iter() {
       self.prs[t.0][t.1] = false;
       if self.prs[t.0].iter().all( |&x| x == false ) {
-        self.c[t.0].mag = self.dcf[t.0];
+        self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0];
+        self.atv[t.0] = false;
       }
     }
     self.pr1[i] = false;
@@ -302,7 +306,8 @@ impl Rsn {
       for &t in self.k2r.iter().filter_map( |s| s.get(h) ) {
         self.prs[t.0][t.1] = false;
         if self.prs[t.0].iter().all( |&x| x == false ) {
-          self.c[t.0].mag = self.dcf[t.0];
+          self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0];
+          self.atv[t.0] = false;
         }
       }
     }
@@ -541,6 +546,7 @@ mod test_vecreson {
       c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
                 Cplxpol { mag: 0.75, angle: 0.5  }],
       lim: vec![1.0 , 1.0 ],
+      atv: vec![false; 2],
       dcn: vec![0.5 , 1.5 ],
       dcf: vec![0.25, 0.75],
       k2r: vec![vec![(0, 0), (1, 1)],
@@ -608,6 +614,7 @@ mod test_vecreson {
       c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
                 Cplxpol { mag: 0.75, angle: 0.5  }],
       lim: vec![1.0 , 1.0 ],
+      atv: vec![false; 2],
       dcn: vec![0.5 , 1.5 ],
       dcf: vec![0.25, 0.75],
       k2r: vec![vec![(0, 0), (1, 1)],
