@@ -148,7 +148,6 @@ const JUST_TABLE : [f64; 12] = [
 #[wasm_bindgen]
 pub struct Source {
   v  : Vec<f32>,
-  mst: f64,
   exc: Exc,
   rsn: Rsn,
   stt: Vec<Cplxpol>,
@@ -163,14 +162,11 @@ impl Source {
     let mx = cfg.into_iter().max().expect("empty array");
     let mut slf = Self {
       v: Vec::with_capacity(128),
-      mst: f_master_a,
       exc: Exc::new(nk, &cfg, f_master_a),
       rsn: Rsn::new(nk, &cfg, f_master_a),
       stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
     };
-    let tau = std::f64::consts::TAU;
-    tune(&mut slf.rsn.c, 33, tau * f_master_a, &slf.eqt);
     slf
   }
 
@@ -179,17 +175,8 @@ impl Source {
   }
 
   pub fn on(&mut self, i: usize) {
-    let tau = std::f64::consts::TAU;
-    let pi  = std::f64::consts::PI;
     self.rsn.on(i);
     self.exc.on(i);
-    if let Some(k) = chord_root(&self.rsn.pr1) {
-      self.rsn.crt = k;
-      tune(&mut self.rsn.c, 24+k as isize, pi * self.mst * self.eqt[k] * self.eqt[3], &JUST_TABLE);
-    } else {
-      self.rsn.crt = 12;
-      tune(&mut self.rsn.c, 33, tau * self.mst, &self.eqt);
-    }
   }
 
   pub fn tick(&mut self, n: usize) {
@@ -291,6 +278,14 @@ impl Rsn {
       }
     }
     self.pr1[i] = true;
+    if let Some(k) = chord_root(&self.pr1) {
+      self.crt = k;
+    } else {
+      self.crt = 12;
+    }
+    for i in 0..self.c.len() {
+      self.c[i].angle = self.ftb[self.crt][i].angle;
+    }
   }
   fn off(&mut self, i: usize) {
     for &t in self.k2r[i].iter() {
@@ -555,7 +550,8 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
-      ftb: vec![vec![]; 13],
+      ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
+                     Cplxpol { mag: 1.0, angle: 0.5  }] ; 13],
     };
 
     rsn.on(0);
@@ -621,7 +617,8 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
-      ftb: vec![vec![]; 13],
+      ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
+                     Cplxpol { mag: 1.0, angle: 0.5  }]; 13],
     };
 
     rsn.on(0);
