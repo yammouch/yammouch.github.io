@@ -260,13 +260,15 @@ const JUST_TABLE : [f64; 12] = [
  15.0/ 8.0,
 ];
 
+type Cpl = Cplxy;
+
 #[derive(Debug)]
 #[wasm_bindgen]
 pub struct Source {
   v  : Vec<f32>,
-  exc: Exc<Cplxpol>,
-  rsn: Rsn<Cplxpol>,
-  stt: Vec<Cplxpol>,
+  exc: Exc<Cpl>,
+  rsn: Rsn<Cpl>,
+  stt: Vec<Cpl>,
   eqt: Vec<f64>,
 }
 
@@ -280,7 +282,7 @@ impl Source {
       v: Vec::with_capacity(128),
       exc: Exc::new(nk, &cfg, f_master_a),
       rsn: Rsn::new(nk, &cfg, f_master_a),
-      stt: vec![Cplxpol{ mag: 0.0, angle: 0.0 }; nk+mx],
+      stt: vec![Cpl::from_magangle(0.0, 0.0); nk+mx],
       eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
     };
     slf
@@ -300,7 +302,7 @@ impl Source {
     for _ in 0..n {
       self.exc.tick(&mut self.stt);
       self.rsn.tick(&mut self.stt);
-      let s : f64 = self.stt.iter().map(Cplxpol::re).sum();
+      let s : f64 = self.stt.iter().map(Cpl::re).sum();
       self.v.push(s as f32);
     }
   }
