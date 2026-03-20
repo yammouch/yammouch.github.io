@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::marker::PhantomData;
 
 #[wasm_bindgen]
 extern "C" {
@@ -16,6 +17,8 @@ pub struct Cplxpol {
 trait Cplx
  : Mul<Output=Self>
  + MulAssign
+ + Add<Output=Self>
+ + AddAssign
  + Sized
  + Clone
  + Copy
@@ -175,7 +178,7 @@ const JUST_TABLE : [f64; 12] = [
 #[wasm_bindgen]
 pub struct Source {
   v  : Vec<f32>,
-  exc: Exc,
+  exc: Exc<Cplxpol>,
   rsn: Rsn<Cplxpol>,
   stt: Vec<Cplxpol>,
   eqt: Vec<f64>,
@@ -365,12 +368,13 @@ impl Iterator for Exc1 {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Exc {
+struct Exc<C> {
   a  : Vec<Vec<Exc1>>,
   exi: Vec<Vec<(usize, usize)>>,
+  _p : PhantomData<C>,
 }
 
-impl Exc {
+impl<C: Cplx> Exc<C> {
   fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut a = vec![ Vec::<Exc1>::new(); nk+mx ];
@@ -385,16 +389,17 @@ impl Exc {
       }
     }
     Self { a,
-           exi: k2r(nk, cfg) }
+           exi: k2r(nk, cfg),
+           _p : PhantomData }
   }
-  fn tick(&mut self, dst: &mut [Cplxpol]) {
+  fn tick(&mut self, dst: &mut [C]) {
     for i in 0..dst.len() {
       let mut c = 0.0;
       for e in &mut self.a[i] {
         c += e.next().unwrap();
       }
       if c != 0.0 {
-        dst[i] += c;
+        dst[i] += c.into();
       }
     }
   }
@@ -721,6 +726,7 @@ mod test_vecreson {
     use super::Cplxpol;
     use super::Exc1;
     use super::Exc;
+    use std::marker::PhantomData;
     let mut exc = Exc {
       a  : vec![
         vec![
@@ -743,6 +749,7 @@ mod test_vecreson {
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
+      _p : PhantomData,
     };
     exc.on(0);
     assert_eq!(exc, Exc {
@@ -767,6 +774,7 @@ mod test_vecreson {
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
+      _p : PhantomData,
     });
     let mut o = vec![Cplxpol { mag: 0.0, angle: 0.0 },
                      Cplxpol { mag: 1.0, angle: 0.0 }];
@@ -796,6 +804,7 @@ mod test_vecreson {
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
+      _p : PhantomData,
     });
   }
 
@@ -804,7 +813,8 @@ mod test_vecreson {
     use super::Cplxpol;
     use super::Exc1;
     use super::Exc;
-    let mut exc = Exc {
+    use std::marker::PhantomData;
+    let mut exc: Exc<Cplxpol> = Exc {
       a  : vec![
         vec![
           Exc1 {
@@ -826,6 +836,7 @@ mod test_vecreson {
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
+      _p : PhantomData,
     };
     exc.harm(0, 0.75);
     assert_eq!(exc, Exc {
@@ -850,6 +861,7 @@ mod test_vecreson {
       ],
       exi: vec![vec![(0, 0), (1, 1)],
                 vec![(1, 0)]],
+      _p : PhantomData,
     });
   }
 }
