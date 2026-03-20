@@ -8,10 +8,12 @@ extern "C" {
   pub fn log(s: &str);
 }
 
+type flt = f32;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Cplxpol {
-  pub mag  : f64,
-  pub angle: f64, // rad
+  pub mag  : flt,
+  pub angle: flt, // rad
 }
 
 trait Cplx
@@ -22,51 +24,51 @@ trait Cplx
  + Sized
  + Clone
  + Copy
- + From<f64>
+ + From<flt>
 {
-  fn from_magangle(mag: f64, angle: f64) -> Self;
-  fn lim(&mut self, l: f64);
+  fn from_magangle(mag: flt, angle: flt) -> Self;
+  fn lim(&mut self, l: flt);
 }
 
 impl Cplxpol {
-  pub fn from_reim(re: f64, im: f64) -> Self {
+  pub fn from_reim(re: flt, im: flt) -> Self {
     Self {
       mag  : (re*re+im*im).sqrt(),
       angle: im.atan2(re)
     }
   }
 
-  pub fn re(&self) -> f64 {
+  pub fn re(&self) -> flt {
     self.mag*self.angle.cos()
   }
 
-  pub fn im(&self) -> f64 {
+  pub fn im(&self) -> flt {
     self.mag*self.angle.sin()
   }
 }
 
 impl Cplx for Cplxpol {
-  fn from_magangle(mag: f64, angle: f64) -> Self {
+  fn from_magangle(mag: flt, angle: flt) -> Self {
     Self {
       mag,
       angle,
     }
   }
 
-  fn lim(&mut self, l: f64) {
+  fn lim(&mut self, l: flt) {
     if l < self.mag {
       self.mag = l;
     }
   }
 }
 
-pub fn angle_regu(angle: f64) -> f64 {
-  let pi = std::f64::consts::PI;
+pub fn angle_regu(angle: flt) -> flt {
+  let pi = std::f64::consts::PI as flt;
   angle - ((angle+pi)/(2.*pi)).floor()*(2.*pi)
 }
 
-impl From<f64> for Cplxpol {
-  fn from(x: f64) -> Self {
+impl From<flt> for Cplxpol {
+  fn from(x: flt) -> Self {
     Self { mag: x, angle: 0.0 }
   }
 }
@@ -115,36 +117,36 @@ impl<T> MulAssign<T> for Cplxpol where
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Cplxy {
-  pub x : f64,
-  pub y : f64,
+  pub x : flt,
+  pub y : flt,
 }
 
 impl Cplxy {
-  pub fn from_reim(re: f64, im: f64) -> Self {
+  pub fn from_reim(re: flt, im: flt) -> Self {
     Self {
       x: re,
       y: im,
     }
   }
 
-  pub fn re(&self) -> f64 {
+  pub fn re(&self) -> flt {
     self.x
   }
 
-  pub fn im(&self) -> f64 {
+  pub fn im(&self) -> flt {
     self.y
   }
 }
 
 impl Cplx for Cplxy {
-  fn from_magangle(mag: f64, angle: f64) -> Self {
+  fn from_magangle(mag: flt, angle: flt) -> Self {
     Self {
       x : mag*angle.cos(),
       y : mag*angle.sin(),
     }
   }
 
-  fn lim(&mut self, l: f64) {
+  fn lim(&mut self, l: flt) {
     let mag2 = self.x*self.x + self.y*self.y;
     let l2 = l*l;
     if l2 < mag2 {
@@ -154,8 +156,8 @@ impl Cplx for Cplxy {
   }
 }
 
-impl From<f64> for Cplxy {
-  fn from(x: f64) -> Self {
+impl From<flt> for Cplxy {
+  fn from(x: flt) -> Self {
     Self { x, y: 0.0 }
   }
 }
@@ -230,9 +232,9 @@ fn chord_root(pr1: &[bool]) -> Option<usize> {
   }
 }
 
-fn tune<C: Cplx>(c: &mut [C], n: isize, f: f64, t: &[f64]) {
+fn tune<C: Cplx>(c: &mut [C], n: isize, f: flt, t: &[flt]) {
   let i = (-n).div_euclid(t.len() as isize);
-  let mut f0 = f*2f64.powf(i as f64);
+  let mut f0 = f*(2 as flt).powf(i as flt);
   let mut j = (-n).rem_euclid(t.len() as isize) as usize;
   for k in 0..c.len() {
     c[k] = C::from_magangle(1., f0*t[j]);
@@ -244,7 +246,7 @@ fn tune<C: Cplx>(c: &mut [C], n: isize, f: f64, t: &[f64]) {
   }
 }
 
-const JUST_TABLE : [f64; 12] = [
+const JUST_TABLE : [flt; 12] = [
   1.0,
  17.0/16.0,
   9.0/ 8.0,
@@ -268,12 +270,12 @@ pub struct Source {
   exc: Exc<Cpl>,
   rsn: Rsn<Cpl>,
   stt: Vec<Cpl>,
-  eqt: Vec<f64>,
+  eqt: Vec<flt>,
 }
 
 #[wasm_bindgen]
 impl Source {
-  pub fn new(f_master_a: f64) -> Self {
+  pub fn new(f_master_a: flt) -> Self {
     let nk = 40;   // the number of keys
     let cfg = [0, 12, 19, 24, 28, 31, 36, 38]; // harmonicses
     let mx = cfg.into_iter().max().expect("empty array");
@@ -282,7 +284,7 @@ impl Source {
       exc: Exc::new(nk, &cfg, f_master_a),
       rsn: Rsn::new(nk, &cfg, f_master_a),
       stt: vec![Cpl::from_magangle(0.0, 0.0); nk+mx],
-      eqt: (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect(),
+      eqt: (0..12).map( |i| (2 as flt).powf((i as flt)/12.)).collect(),
     };
     slf
   }
@@ -301,7 +303,7 @@ impl Source {
     for _ in 0..n {
       self.exc.tick(&mut self.stt);
       self.rsn.tick(&mut self.stt);
-      let s : f64 = self.stt.iter().map(Cpl::re).sum();
+      let s : flt = self.stt.iter().map(Cpl::re).sum();
       self.v.push(s as f32);
     }
   }
@@ -314,7 +316,7 @@ impl Source {
     self.rsn.crt
   }
 
-  pub fn harm(&mut self, h: usize, mag: f64) {
+  pub fn harm(&mut self, h: usize, mag: flt) {
     self.exc.harm(h, mag);
     self.rsn.harm(h, mag);
   }
@@ -338,23 +340,23 @@ struct Rsn<C> {
 //struct Rsn {
   //c  : Vec<Cplxpol>,
   c  : Vec<C>,
-  lim: Vec<f64>,
+  lim: Vec<flt>,
   atv: Vec<bool>,
-  dcn: Vec<f64>,
-  dcf: Vec<f64>,
+  dcn: Vec<flt>,
+  dcf: Vec<flt>,
   k2r: Vec<Vec<(usize, usize)>>,
   prs: Vec<Vec<bool>>,
   pr1: Vec<bool>,
-  drb: [f64; 8],
+  drb: [flt; 8],
   crt: usize,
   //ftb: Vec<Vec<Cplxpol>>,
   ftb: Vec<Vec<C>>,
 }
 
 impl<C: Cplx> Rsn<C> {
-  fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
-    let pi = std::f64::consts::PI;
-    let tau = std::f64::consts::TAU;
+  fn new(nk: usize, cfg: &[usize], f_master_a: flt) -> Self {
+    let pi = std::f64::consts::PI as flt;
+    let tau = std::f64::consts::TAU as flt;
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut prs = vec![vec![]; nk+mx];
     for &c in cfg {
@@ -363,13 +365,15 @@ impl<C: Cplx> Rsn<C> {
       }
     }
     let mut ftb = vec![vec![1.0.into(); nk+mx]; 13];
-    let eqt = (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect::<Vec<_>>();
+    let eqt = (0..12).map( |i|
+     (2 as flt).powf((i as flt)/12.)
+    ).collect::<Vec<_>>();
     tune(&mut ftb[12], 33, tau * f_master_a, &eqt);
     for i in 0..12 {
       tune(
        &mut ftb[i],
        24+i as isize,
-       pi * f_master_a * 2f64.powf(((i+3) as f64)/12.),
+       pi * f_master_a * (2 as flt).powf(((i+3) as flt)/12.),
        &JUST_TABLE);
     }
     Self {
@@ -420,7 +424,7 @@ impl<C: Cplx> Rsn<C> {
     }
     self.pr1[i] = false;
   }
-  fn harm(&mut self, h: usize, mag: f64) {
+  fn harm(&mut self, h: usize, mag: flt) {
     self.drb[h] = mag;
     if mag == 0.0 {
       for &t in self.k2r.iter().filter_map( |s| s.get(h) ) {
@@ -437,12 +441,12 @@ impl<C: Cplx> Rsn<C> {
 #[derive(Debug, Clone, PartialEq)]
 struct Exc1 {
   n: usize,
-  v: Vec<f64>,
-  a: f64,
+  v: Vec<flt>,
+  a: flt,
 }
 
 impl Iterator for Exc1 {
-  type Item = f64;
+  type Item = flt;
 
   fn next(&mut self) -> Option<Self::Item> {
     if 0 < self.n {
@@ -462,12 +466,12 @@ struct Exc<C> {
 }
 
 impl<C: Cplx> Exc<C> {
-  fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
+  fn new(nk: usize, cfg: &[usize], f_master_a: flt) -> Self {
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut a = vec![ Vec::<Exc1>::new(); nk+mx ];
     for &c in cfg {
       for i in 0..nk {
-        let f = f_master_a*2f64.powf(((c + i) as f64 - 33.0)/12.0);
+        let f = f_master_a*(2 as flt).powf(((c + i) as flt - 33.0)/12.0);
         a[c+i].push( Exc1 {
           n: 0,
           v: vec![f/0.5; (0.5/f).round_ties_even() as usize],
@@ -495,7 +499,7 @@ impl<C: Cplx> Exc<C> {
       self.a[t.0][t.1].n = self.a[t.0][t.1].v.len();
     }
   }
-  fn harm(&mut self, i: usize, mag: f64) {
+  fn harm(&mut self, i: usize, mag: flt) {
     for v in &self.exi {
       let (i0, i1) = v[i];
       self.a[i0][i1].a = mag;
@@ -507,13 +511,14 @@ impl<C: Cplx> Exc<C> {
 mod cplxpol_test {
   use wasm_bindgen_test::*;
   use super::Cplxpol;
+  use super::flt;
 
-  fn points() -> Vec<(f64, f64)> {
+  fn points() -> Vec<(flt, flt)> {
     use std::iter::once;
-    let crd = vec![3f64.sqrt()*0.5, 1.0, 3f64.sqrt()];
-    let crd = crd.iter().rev().map(|&x| -x).chain(once(0f64))
+    let crd = vec![(3 as flt).sqrt()*0.5, 1.0, (3 as flt).sqrt()];
+    let crd = crd.iter().rev().map(|&x| -x).chain(once(0 as flt))
               .chain(crd.iter().map(|&x| x)).collect::<Vec<_>>();
-    let mut points : Vec<(f64, f64)> = vec![];
+    let mut points : Vec<(flt, flt)> = vec![];
     for &re in &crd {
       for &im in &crd {
         points.push((re, im));
@@ -524,16 +529,16 @@ mod cplxpol_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn add () {
-    let pi = std::f64::consts::PI;
+    let pi = std::f64::consts::PI as flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
         let a = Cplxpol::from_reim(are, aim);
         let b = Cplxpol::from_reim(bre, bim);
         let sum = a + b;
-        assert!((are + bre - sum.re()).abs() < 1e-6,
+        assert!((are + bre - sum.re()).abs() < 1e-5,
          "are: {are}, bre: {bre}, result: {}", sum.re());
-        assert!((aim + bim - sum.im()).abs() < 1e-6,
+        assert!((aim + bim - sum.im()).abs() < 1e-5,
          "aim: {aim}, bim: {bim}, result: {}", sum.im());
         assert!(sum.angle.abs() < pi+0.1,
          "angle: {}", sum.angle);
@@ -543,16 +548,16 @@ mod cplxpol_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn mul () {
-    let pi = std::f64::consts::PI;
+    let pi = std::f64::consts::PI as flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
         let a = Cplxpol::from_reim(are, aim);
         let b = Cplxpol::from_reim(bre, bim);
         let prod = a * b;
-        assert!((are*bre - aim*bim - prod.re()).abs() < 1e-6,
+        assert!((are*bre - aim*bim - prod.re()).abs() < 1e-5,
          "rere: {}, imim: {}, re: {}", are*bre, aim*bim, prod.re());
-        assert!((aim*bre + are*bim - prod.im()).abs() < 1e-6,
+        assert!((aim*bre + are*bim - prod.im()).abs() < 1e-5,
          "imre: {}, reim: {}, im: {}", aim*bre, are*bim, prod.im());
         assert!(prod.angle.abs() < pi+0.1,
          "angle: {}", prod.angle);
@@ -565,13 +570,14 @@ mod cplxpol_test {
 mod cplxy_test {
   use wasm_bindgen_test::*;
   use super::Cplxy;
+  use super::flt;
 
-  fn points() -> Vec<(f64, f64)> {
+  fn points() -> Vec<(flt, flt)> {
     use std::iter::once;
-    let crd = vec![3f64.sqrt()*0.5, 1.0, 3f64.sqrt()];
-    let crd = crd.iter().rev().map(|&x| -x).chain(once(0f64))
+    let crd = vec![(3 as flt).sqrt()*0.5, 1.0, (3 as flt).sqrt()];
+    let crd = crd.iter().rev().map(|&x| -x).chain(once(0 as flt))
               .chain(crd.iter().map(|&x| x)).collect::<Vec<_>>();
-    let mut points : Vec<(f64, f64)> = vec![];
+    let mut points : Vec<(flt, flt)> = vec![];
     for &re in &crd {
       for &im in &crd {
         points.push((re, im));
@@ -582,7 +588,7 @@ mod cplxy_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn add () {
-    let pi = std::f64::consts::PI;
+    let pi = std::f64::consts::PI as flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
@@ -601,7 +607,7 @@ mod cplxy_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn mul () {
-    let pi = std::f64::consts::PI;
+    let pi = std::f64::consts::PI as flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
