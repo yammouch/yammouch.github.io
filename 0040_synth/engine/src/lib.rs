@@ -113,6 +113,92 @@ impl<T> MulAssign<T> for Cplxpol where
   }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Cplxy {
+  pub x : f64,
+  pub y : f64,
+}
+
+impl Cplxy {
+  pub fn from_reim(re: f64, im: f64) -> Self {
+    Self {
+      x: re,
+      y: im,
+    }
+  }
+
+  pub fn re(&self) -> f64 {
+    self.x
+  }
+
+  pub fn im(&self) -> f64 {
+    self.y
+  }
+}
+
+impl Cplx for Cplxy {
+  fn from_magangle(mag: f64, angle: f64) -> Self {
+    Self {
+      x : mag*angle.cos(),
+      y : mag*angle.sin(),
+    }
+  }
+
+  fn lim(&mut self, l: f64) {
+    let mag2 = self.x*self.x + self.y*self.y;
+    let l2 = l*l;
+    if l2 < mag2 {
+      let r = (l2/mag2).sqrt();
+      self.x *= r;
+      self.y *= r;
+    }
+  }
+}
+
+impl From<f64> for Cplxy {
+  fn from(x: f64) -> Self {
+    Self { x, y: 0.0 }
+  }
+}
+
+impl<T> Add<T> for Cplxy where
+ T: Into<Cplxy> {
+  type Output = Self;
+
+  fn add(self, other: T) -> Self {
+    let other = other.into();
+    Self { x: self.x + other.x, y: self.y + other.y }
+  }
+}
+
+impl<T> AddAssign<T> for Cplxy where
+ T: Into<Cplxy> {
+  fn add_assign(&mut self, other: T) {
+    *self = self.clone() + other.into();
+  }
+}
+
+impl<T> Mul<T> for Cplxy where
+ T: Into<Cplxy> {
+  type Output = Self;
+
+  fn mul(self, other: T) -> Self {
+    let other = other.into();
+    Self {
+      x: self.x*other.x - self.y*other.y,
+      y: self.x*other.y + self.y*other.x,
+    }
+  }
+}
+
+impl<T> MulAssign<T> for Cplxy where
+ T: Into<Cplxy> {
+  fn mul_assign(&mut self, other: T) {
+    let other = other.into();
+    *self = self.clone() * other;
+  }
+}
+
 fn chord_root(pr1: &[bool]) -> Option<usize> {
   let mut oct = [0usize; 12];
   let mut low : Option<usize> = None;
@@ -466,6 +552,64 @@ mod cplxpol_test {
          "imre: {}, reim: {}, im: {}", aim*bre, are*bim, prod.im());
         assert!(prod.angle.abs() < pi+0.1,
          "angle: {}", prod.angle);
+      }
+    }
+  }
+}
+
+#[cfg(test)]
+mod cplxy_test {
+  use wasm_bindgen_test::*;
+  use super::Cplxy;
+
+  fn points() -> Vec<(f64, f64)> {
+    use std::iter::once;
+    let crd = vec![3f64.sqrt()*0.5, 1.0, 3f64.sqrt()];
+    let crd = crd.iter().rev().map(|&x| -x).chain(once(0f64))
+              .chain(crd.iter().map(|&x| x)).collect::<Vec<_>>();
+    let mut points : Vec<(f64, f64)> = vec![];
+    for &re in &crd {
+      for &im in &crd {
+        points.push((re, im));
+      }
+    }
+    points
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn add () {
+    let pi = std::f64::consts::PI;
+    let points = points();
+    for &(are, aim) in &points {
+      for &(bre, bim) in &points {
+        let a = Cplxy::from_reim(are, aim);
+        let b = Cplxy::from_reim(bre, bim);
+        let sum = a + b;
+        assert!((are + bre - sum.re()).abs() < 1e-6,
+         "are: {are}, bre: {bre}, result: {}", sum.re());
+        assert!((aim + bim - sum.im()).abs() < 1e-6,
+         "aim: {aim}, bim: {bim}, result: {}", sum.im());
+        //assert!(sum.angle.abs() < pi+0.1,
+        // "angle: {}", sum.angle);
+      }
+    }
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn mul () {
+    let pi = std::f64::consts::PI;
+    let points = points();
+    for &(are, aim) in &points {
+      for &(bre, bim) in &points {
+        let a = Cplxy::from_reim(are, aim);
+        let b = Cplxy::from_reim(bre, bim);
+        let prod = a * b;
+        assert!((are*bre - aim*bim - prod.re()).abs() < 1e-6,
+         "rere: {}, imim: {}, re: {}", are*bre, aim*bim, prod.re());
+        assert!((aim*bre + are*bim - prod.im()).abs() < 1e-6,
+         "imre: {}, reim: {}, im: {}", aim*bre, are*bim, prod.im());
+        //assert!(prod.angle.abs() < pi+0.1,
+        // "angle: {}", prod.angle);
       }
     }
   }
