@@ -13,6 +13,10 @@ pub struct Cplxpol {
   pub angle: f64, // rad
 }
 
+trait Cplx {
+  fn from_magangle(mag: f64, angle: f64) -> Self;
+}
+
 impl Cplxpol {
   pub fn from_reim(re: f64, im: f64) -> Self {
     Self {
@@ -27,6 +31,15 @@ impl Cplxpol {
 
   pub fn im(&self) -> f64 {
     self.mag*self.angle.sin()
+  }
+}
+
+impl Cplx for Cplxpol {
+  fn from_magangle(mag: f64, angle: f64) -> Self {
+    Self {
+      mag,
+      angle,
+    }
   }
 }
 
@@ -115,12 +128,12 @@ fn chord_root(pr1: &[bool]) -> Option<usize> {
   }
 }
 
-fn tune(c: &mut [Cplxpol], n: isize, f: f64, t: &[f64]) {
+fn tune<C: Cplx>(c: &mut [C], n: isize, f: f64, t: &[f64]) {
   let i = (-n).div_euclid(t.len() as isize);
   let mut f0 = f*2f64.powf(i as f64);
   let mut j = (-n).rem_euclid(t.len() as isize) as usize;
   for k in 0..c.len() {
-    c[k].angle = f0*t[j];
+    c[k] = C::from_magangle(1., f0*t[j]);
     j += 1;
     if t.len() <= j {
       j = 0;
