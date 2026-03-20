@@ -13,8 +13,16 @@ pub struct Cplxpol {
   pub angle: f64, // rad
 }
 
-trait Cplx {
+trait Cplx
+ : Mul<Output=Self>
+ + MulAssign
+ + Sized
+ + Clone
+ + Copy
+ + From<f64>
+{
   fn from_magangle(mag: f64, angle: f64) -> Self;
+  fn lim(&mut self, l: f64);
 }
 
 impl Cplxpol {
@@ -39,6 +47,12 @@ impl Cplx for Cplxpol {
     Self {
       mag,
       angle,
+    }
+  }
+
+  fn lim(&mut self, l: f64) {
+    if l < self.mag {
+      self.mag = l;
     }
   }
 }
@@ -162,7 +176,7 @@ const JUST_TABLE : [f64; 12] = [
 pub struct Source {
   v  : Vec<f32>,
   exc: Exc,
-  rsn: Rsn,
+  rsn: Rsn<Cplxpol>,
   stt: Vec<Cplxpol>,
   eqt: Vec<f64>,
 }
@@ -230,8 +244,10 @@ fn k2r(nk: usize, cfg: &[usize]) -> Vec<Vec<(usize, usize)>> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Rsn {
-  c  : Vec<Cplxpol>,
+struct Rsn<C> {
+//struct Rsn {
+  //c  : Vec<Cplxpol>,
+  c  : Vec<C>,
   lim: Vec<f64>,
   atv: Vec<bool>,
   dcn: Vec<f64>,
@@ -241,10 +257,11 @@ struct Rsn {
   pr1: Vec<bool>,
   drb: [f64; 8],
   crt: usize,
-  ftb: Vec<Vec<Cplxpol>>,
+  //ftb: Vec<Vec<Cplxpol>>,
+  ftb: Vec<Vec<C>>,
 }
 
-impl Rsn {
+impl<C: Cplx> Rsn<C> {
   fn new(nk: usize, cfg: &[usize], f_master_a: f64) -> Self {
     let pi = std::f64::consts::PI;
     let tau = std::f64::consts::TAU;
@@ -255,7 +272,7 @@ impl Rsn {
         prs[c+i].push(false);
       }
     }
-    let mut ftb = vec![vec![1f64.into(); nk+mx]; 13];
+    let mut ftb = vec![vec![1.0.into(); nk+mx]; 13];
     let eqt = (0..12).map( |i| 2f64.powf((i as f64)/12.)).collect::<Vec<_>>();
     tune(&mut ftb[12], 33, tau * f_master_a, &eqt);
     for i in 0..12 {
@@ -266,7 +283,7 @@ impl Rsn {
        &JUST_TABLE);
     }
     Self {
-      c  : vec![Cplxpol { mag: 1. - 1e-2, angle: 0.0 }; nk+mx],
+      c  : vec![C::from_magangle(1. - 1e-2, 0.0); nk+mx],
       lim: vec![10.0; nk+mx],
       atv: vec![false; nk+mx],
       dcn: vec![1. - 1e-4; nk+mx],
@@ -279,10 +296,10 @@ impl Rsn {
       ftb,
     }
   }
-  fn tick(&self, dst: &mut [Cplxpol]) {
+  fn tick(&self, dst: &mut [C]) {
     for i in 0..dst.len() {
       dst[i] *= self.c[i];
-      dst[i].mag = dst[i].mag.min(self.lim[i]);
+      dst[i].lim(self.lim[i]);
     }
   }
   fn on(&mut self, i: usize) {
@@ -300,14 +317,14 @@ impl Rsn {
     }
     for i in 0..self.c.len() {
       let dcy = if self.atv[i] { self.dcn[i] } else { self.dcf[i] };
-      self.c[i] = self.ftb[self.crt][i] * dcy;
+      self.c[i] = self.ftb[self.crt][i] * dcy.into();
     }
   }
   fn off(&mut self, i: usize) {
     for &t in self.k2r[i].iter() {
       self.prs[t.0][t.1] = false;
       if self.prs[t.0].iter().all( |&x| x == false ) {
-        self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0];
+        self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0].into();
         self.atv[t.0] = false;
       }
     }
@@ -319,7 +336,7 @@ impl Rsn {
       for &t in self.k2r.iter().filter_map( |s| s.get(h) ) {
         self.prs[t.0][t.1] = false;
         if self.prs[t.0].iter().all( |&x| x == false ) {
-          self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0];
+          self.c[t.0] = self.ftb[self.crt][t.0] * self.dcf[t.0].into();
           self.atv[t.0] = false;
         }
       }
