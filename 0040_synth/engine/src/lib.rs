@@ -230,6 +230,15 @@ fn lcm2<T>(a: T, b: T) -> T where
   a*b / gcd2(a, b)
 }
 
+fn chord_root2(pr1: &[bool], den: &[u32]) {
+  for i in 0..den.len() {
+    let a = pr1.iter().cycle().skip(i).zip(den).filter_map( |(&b, &x)| {
+      if b { Some(x) } else { None }
+    });
+    println!("{:?}", a.collect::<Vec<_>>());
+  }
+}
+
 fn chord_root(pr1: &[bool]) -> Option<usize> {
   let mut oct = [0usize; 12];
   let mut low : Option<usize> = None;
@@ -679,6 +688,16 @@ mod gcd_test {
     assert_eq!(lcm2(8, 8), 8);
     assert_eq!(lcm2(1, 8), 8);
     assert_eq!(lcm2(8, 1), 8);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_chord_root2() {
+    use super::chord_root2;
+    chord_root2(&[true , false, false, false, true , false,
+                  false, true , false, false, false, false],
+                &[  160,   170,   180,   192,   200,   216,
+                    225,   240,   250,   270,   288,   300]);
+    panic!();
   }
 }
 
