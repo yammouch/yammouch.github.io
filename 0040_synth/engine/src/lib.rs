@@ -104,6 +104,11 @@ fn gcd2<T>(mut a: T, mut b: T) -> T where
   }
 }
 
+fn chord_root2(pr1: &[bool], den: &[u32]) {
+  let a = pr1.iter().zip(den);
+  println!("{:?}", a.collect::<Vec<_>>());
+}
+
 fn chord_root(pr1: &[bool]) -> Option<usize> {
   let mut oct = [0usize; 12];
   let mut low : Option<usize> = None;
@@ -476,6 +481,13 @@ mod gdc_test {
     assert_eq!(gcd2(8, 8), 8);
     assert_eq!(gcd2(1, 8), 1);
     assert_eq!(gcd2(8, 1), 1);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_chord_root2() {
+    use super::chord_root2;
+    chord_root2(&[true], &[0]);
+    panic!();
   }
 }
 
