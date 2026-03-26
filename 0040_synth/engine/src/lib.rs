@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Rem, RemAssign};
 
 #[wasm_bindgen]
 extern "C" {
@@ -83,19 +83,21 @@ impl<T> MulAssign<T> for Cplxpol where
   }
 }
 
-fn gcd2(mut a: u32, mut b: u32) -> u32 {
+fn gcd2<T>(mut a: T, mut b: T) -> T where
+  T: PartialEq + PartialOrd + Rem<Output = T> + RemAssign + From<u8> + Copy,
+{
   if a <= b {
-    if b % a == 0 {
+    if b % a == 0u8.into() {
       return a
     }
     b %= a;
   }
   loop {
-    if b == 0 {
+    if b == 0u8.into() {
       return a;
     }
     a %= b;
-    if a == 0 {
+    if a == 0u8.into() {
       return b;
     }
     b %= a;
