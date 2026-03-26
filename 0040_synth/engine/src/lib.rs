@@ -201,6 +201,25 @@ impl<T> MulAssign<T> for Cplxy where
   }
 }
 
+fn gcd2(mut a: u32, mut b: u32) -> u32 {
+  if a <= b {
+    if b % a == 0 {
+      return a
+    }
+    b %= a;
+  }
+  loop {
+    if b == 0 {
+      return a;
+    }
+    a %= b;
+    if a == 0 {
+      return b;
+    }
+    b %= a;
+  }
+}
+
 fn chord_root(pr1: &[bool]) -> Option<usize> {
   let mut oct = [0usize; 12];
   let mut low : Option<usize> = None;
@@ -616,6 +635,25 @@ mod cplxy_test {
         // "angle: {}", prod.angle);
       }
     }
+  }
+}
+
+#[cfg(test)]
+mod gcd_test {
+  use wasm_bindgen_test::*;
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_gcd2() {
+    use super::gcd2;
+    assert_eq!(gcd2(6, 3), 3);
+    assert_eq!(gcd2(3, 6), 3);
+    assert_eq!(gcd2(12, 4), 4);
+    assert_eq!(gcd2(4, 12), 4);
+    assert_eq!(gcd2(7, 4), 1);
+    assert_eq!(gcd2(4, 7), 1);
+    assert_eq!(gcd2(8, 8), 8);
+    assert_eq!(gcd2(1, 8), 1);
+    assert_eq!(gcd2(8, 1), 1);
   }
 }
 
