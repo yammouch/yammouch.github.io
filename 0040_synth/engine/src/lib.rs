@@ -271,7 +271,6 @@ pub struct Source {
   exc: Exc<Cpl>,
   rsn: Rsn<Cpl>,
   stt: Vec<Cpl>,
-  eqt: Vec<Flt>,
 }
 
 #[wasm_bindgen]
@@ -280,12 +279,11 @@ impl Source {
     let nk = 40;   // the number of keys
     let cfg = [0, 12, 19, 24, 28, 31, 36, 38]; // harmonicses
     let mx = cfg.into_iter().max().expect("empty array");
-    let mut slf = Self {
+    let slf = Self {
       v: Vec::with_capacity(128),
       exc: Exc::new(nk, &cfg, f_master_a),
       rsn: Rsn::new(nk, &cfg, f_master_a),
       stt: vec![Cpl::from_magangle(0.0, 0.0); nk+mx],
-      eqt: (0..12).map( |i| (2 as Flt).powf((i as Flt)/12.)).collect(),
     };
     slf
   }
@@ -586,7 +584,6 @@ mod cplxy_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn add () {
-    let pi = std::f64::consts::PI as Flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
@@ -605,7 +602,6 @@ mod cplxy_test {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn mul () {
-    let pi = std::f64::consts::PI as Flt;
     let points = points();
     for &(are, aim) in &points {
       for &(bre, bim) in &points {
@@ -844,7 +840,6 @@ mod test_vecreson {
 
   #[wasm_bindgen_test(unsupported = test)]
   fn test_exc1() {
-    use super::Cplxpol;
     use super::Exc1;
 
     let mut exc1 = Exc1 {

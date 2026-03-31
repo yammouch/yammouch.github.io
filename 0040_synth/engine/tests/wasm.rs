@@ -1,4 +1,5 @@
 use wasm_bindgen_test::*;
+#[allow(unused_imports)]
 use reson::log;
 
 #[wasm_bindgen_test]
