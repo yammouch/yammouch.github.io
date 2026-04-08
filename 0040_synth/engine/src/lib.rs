@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use std::ops::{Add, AddAssign, Mul, MulAssign, Rem, RemAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Div, Rem, RemAssign};
 use std::marker::PhantomData;
 
 #[wasm_bindgen]
@@ -220,6 +220,14 @@ fn gcd2<T>(mut a: T, mut b: T) -> T where
     }
     b %= a;
   }
+}
+
+fn lcm2<T>(a: T, b: T) -> T where
+  T: PartialEq + PartialOrd + Rem<Output = T> + RemAssign
+   + Mul<Output = T> + Div<Output = T>
+   + From<u8> + Copy,
+{
+  a*b / gcd2(a, b)
 }
 
 fn chord_root(pr1: &[bool]) -> Option<usize> {
@@ -656,6 +664,21 @@ mod gcd_test {
     assert_eq!(gcd2(8, 8), 8);
     assert_eq!(gcd2(1, 8), 1);
     assert_eq!(gcd2(8, 1), 1);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn test_lcm2() {
+    use super::lcm2;
+    assert_eq!(lcm2(6, 3), 6);
+    assert_eq!(lcm2(3, 6), 6);
+    assert_eq!(lcm2(4, 6), 12);
+    assert_eq!(lcm2(12, 4), 12);
+    assert_eq!(lcm2(4, 12), 12);
+    assert_eq!(lcm2(7, 4), 28);
+    assert_eq!(lcm2(4, 7), 28);
+    assert_eq!(lcm2(8, 8), 8);
+    assert_eq!(lcm2(1, 8), 8);
+    assert_eq!(lcm2(8, 1), 8);
   }
 }
 
