@@ -53,6 +53,7 @@ window.addEventListener("load", () => {
       squareNode.port.postMessage(off);
     }
   });
+  setupMIDI();
   play();
 
 });
@@ -129,6 +130,30 @@ function drawbar(port) {
       value : e.target.value
     });
   });
+}
+
+async function setupMIDI() {
+  try {
+    const midiAccess = await navigator.requestMIDIAccess();
+    console.log("success MIDI access");
+
+    for (const entry of midiAccess.inputs) {
+      const input = entry[1];
+      console.log(
+        `input port [type:'${input.type}']` +
+        ` id:'${input.id}'` +
+        ` manufacturer:'${input.manufacturer}'` +
+        ` name:'${input.name}'` +
+        ` version:'${input.version}'`
+      );
+    }
+    //const inputs = midiAccess.inputs.values();
+    //for (const input of inputs) {
+    //  console.log(`device connected: ${input.name}`);
+    //}
+  } catch (err) {
+    console.error("failed MIDI access", err);
+  }
 }
 
 async function play() {
