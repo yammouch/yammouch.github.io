@@ -53,9 +53,7 @@ window.addEventListener("load", () => {
       squareNode.port.postMessage(off);
     }
   });
-  setupMIDI();
   play();
-
 });
 
 function drawbar(port) {
@@ -187,6 +185,7 @@ async function play() {
    sampleRate: audioContext.sampleRate,
    master    : 440,
    wasm      : wasm });
+  await setupMIDI();
 }
 
 </script>
