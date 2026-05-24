@@ -133,7 +133,11 @@ function drawbar(port) {
 }
 
 function onMIDIMessage(e) {
-  console.log(e);
+  if ((e.data[0] & 0xf0) === 0x80) {
+    console.log(e.data);
+  } else if ((e.data[0] & 0xf0) === 0x90) {
+    console.log(e.data);
+  }
 }
 
 async function setupMIDI() {
