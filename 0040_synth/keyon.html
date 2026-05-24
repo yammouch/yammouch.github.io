@@ -132,6 +132,10 @@ function drawbar(port) {
   });
 }
 
+function onMIDIMessage(e) {
+  console.log(e);
+}
+
 async function setupMIDI() {
   try {
     const midiAccess = await navigator.requestMIDIAccess();
@@ -146,11 +150,9 @@ async function setupMIDI() {
         ` name:'${input.name}'` +
         ` version:'${input.version}'`
       );
+      console.log(entry);
+      input.onmidimessage = onMIDIMessage;
     }
-    //const inputs = midiAccess.inputs.values();
-    //for (const input of inputs) {
-    //  console.log(`device connected: ${input.name}`);
-    //}
   } catch (err) {
     console.error("failed MIDI access", err);
   }
