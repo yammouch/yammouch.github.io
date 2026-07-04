@@ -281,7 +281,7 @@ impl Source {
     let mx = cfg.into_iter().max().expect("empty array");
     let slf = Self {
       v: Vec::with_capacity(128),
-      exc: Exc::new(nk, &cfg, f_master_a),
+      exc: Exc::new(nk, &cfg, f_master_a, 33),
       rsn: Rsn::new(nk, &cfg, f_master_a),
       stt: vec![Cpl::from_magangle(0.0, 0.0); nk+mx],
     };
@@ -462,12 +462,12 @@ struct Exc<C> {
 }
 
 impl<C: Cplx> Exc<C> {
-  fn new(nk: usize, cfg: &[usize], f_master_a: Flt) -> Self {
+  fn new(nk: usize, cfg: &[usize], f_master_a: Flt, apos: isize) -> Self {
     let mx = cfg.iter().max().expect("empty array").clone();
     let mut a = vec![ Vec::<Exc1>::new(); nk+mx ];
     for &c in cfg {
       for i in 0..nk {
-        let f = f_master_a*(2 as Flt).powf(((c + i) as Flt - 33.0)/12.0);
+        let f = f_master_a*(2 as Flt).powf(((c + i) as Flt - apos as Flt)/12.0);
         a[c+i].push( Exc1 {
           n: 0,
           v: vec![f/0.5; (0.5/f).round_ties_even() as usize],
