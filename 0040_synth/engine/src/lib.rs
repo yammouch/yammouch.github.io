@@ -277,12 +277,13 @@ pub struct Source {
 impl Source {
   pub fn new(f_master_a: Flt) -> Self {
     let nk = 40;   // the number of keys
+    let apos = 33;
     let cfg = [0, 12, 19, 24, 28, 31, 36, 38]; // harmonicses
     let mx = cfg.into_iter().max().expect("empty array");
     let slf = Self {
       v: Vec::with_capacity(128),
-      exc: Exc::new(nk, &cfg, f_master_a, 33),
-      rsn: Rsn::new(nk, &cfg, f_master_a),
+      exc: Exc::new(nk, &cfg, f_master_a, apos),
+      rsn: Rsn::new(nk, &cfg, f_master_a, apos),
       stt: vec![Cpl::from_magangle(0.0, 0.0); nk+mx],
     };
     slf
@@ -350,7 +351,7 @@ struct Rsn<C> {
 }
 
 impl<C: Cplx> Rsn<C> {
-  fn new(nk: usize, cfg: &[usize], f_master_a: Flt) -> Self {
+  fn new(nk: usize, cfg: &[usize], f_master_a: Flt, apos: isize) -> Self {
     let pi = std::f64::consts::PI as Flt;
     let tau = std::f64::consts::TAU as Flt;
     let mx = cfg.iter().max().expect("empty array").clone();
@@ -364,7 +365,7 @@ impl<C: Cplx> Rsn<C> {
     let eqt = (0..12).map( |i|
      (2 as Flt).powf((i as Flt)/12.)
     ).collect::<Vec<_>>();
-    tune(&mut ftb[12], 33, tau * f_master_a, &eqt);
+    tune(&mut ftb[12], apos, tau * f_master_a, &eqt);
     for i in 0..12 {
       tune(
        &mut ftb[i],
