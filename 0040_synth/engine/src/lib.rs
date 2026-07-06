@@ -275,9 +275,7 @@ pub struct Source {
 
 #[wasm_bindgen]
 impl Source {
-  pub fn new(f_master_a: Flt) -> Self {
-    let nk = 40;   // the number of keys
-    let apos = 33;
+  pub fn new(nk: usize, f_master_a: Flt, apos: isize) -> Self {
     let cfg = [0, 12, 19, 24, 28, 31, 36, 38]; // harmonicses
     let mx = cfg.into_iter().max().expect("empty array");
     let slf = Self {
