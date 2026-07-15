@@ -18,7 +18,7 @@ export function note2onoff_build(notekey) {
   });
 }
 
-let notekey = Array.from({ length: 40 }, () => []).concat([
+let notekey = Array.from({ length: 36 }, () => []).concat([
   ["Digit1"],
   [],
   ["KeyQ"],
