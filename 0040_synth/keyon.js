@@ -15,7 +15,7 @@ class SquareProcessor extends AudioWorkletProcessor {
         this.src.off(e.data.note);
       } else if (e.data.cmd == "init") {
         this.wasm = initSync(e.data.wasm);
-        this.src = Source.new(40, e.data.master / e.data.sampleRate, 33);
+        this.src = Source.new(41, e.data.master / e.data.sampleRate, 34);
       } else if (e.data.cmd == "harm") {
         console.log(e.data);
         this.src.harm(e.data.harm, e.data.value*0.125);

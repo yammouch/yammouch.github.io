@@ -366,8 +366,8 @@ impl<C: Cplx> Rsn<C> {
     tune(&mut ftb[12], apos, tau * f_master_a, &eqt);
     for i in 0..12 {
       tune(
-       &mut ftb[i],
-       24+i as isize,
+       &mut ftb[(i+apos-9).rem_euclid(12) as usize],
+       apos-9+i as isize,
        pi * f_master_a * (2 as Flt).powf(((i+3) as Flt)/12.),
        &JUST_TABLE);
     }
