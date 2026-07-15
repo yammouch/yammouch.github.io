@@ -18,7 +18,7 @@ export function note2onoff_build(notekey) {
   });
 }
 
-let notekey = [
+let notekey = Array.from({ length: 40 }, () => []).concat([
   ["Digit1"],
   [],
   ["KeyQ"],
@@ -59,7 +59,7 @@ let notekey = [
   ["Backslash"],
   ["Enter"],
   ["ShiftRight"]
-];
+]);
 
 export class UpDown2OnOff {
 
