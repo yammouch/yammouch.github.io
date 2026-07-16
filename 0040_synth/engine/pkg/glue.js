@@ -35,11 +35,13 @@ export class Source {
         wasm.source_harm(this.__wbg_ptr, h, mag);
     }
     /**
+     * @param {number} nk
      * @param {number} f_master_a
+     * @param {number} apos
      * @returns {Source}
      */
-    static new(f_master_a) {
-        const ret = wasm.source_new(f_master_a);
+    static new(nk, f_master_a, apos) {
+        const ret = wasm.source_new(nk, f_master_a, apos);
         return Source.__wrap(ret);
     }
     /**
