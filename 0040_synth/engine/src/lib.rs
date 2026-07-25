@@ -203,15 +203,35 @@ impl<T> MulAssign<T> for Cplxy where
 
 #[derive(PartialEq, Clone, Debug)]
 struct ChordRoot {
+  //tbl: Vec<Optional<usize>>,
+}
+
+fn bool4096(mut i: usize) -> [bool; 12] {
+  let mut rv = [false; 12];
+  for j in 0..12 {
+    rv[j] = i % 2 != 0;
+    i >>= 1;
+  }
+  rv
 }
 
 impl ChordRoot {
 
+  //fn new() -> Self {
+  //  let mut slf = Self {
+  //    tbl: vec![None; 4096],
+  //  }
+  //}
+
   fn root(&self, pr1: &[bool]) -> Option<usize> {
     let mut oct = [0usize; 12];
+    let mut pror = [false; 12];
     let mut low : Option<usize> = None;
     for i in 0..pr1.len() {
-      if pr1[i] {
+      pror[i%pror.len()] |= pr1[i];
+    }
+    for i in 0..pror.len() {
+      if pror[i] {
         if low == None {
           low = Some(i);
         }
@@ -631,6 +651,19 @@ mod cplxy_test {
 #[cfg(test)]
 mod test_vecreson {
   use wasm_bindgen_test::*;
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn bool4096() {
+    use super::bool4096;
+    assert_eq!(bool4096(1),
+              [true ,false,false,false,
+               false,false,false,false,
+               false,false,false,false]);
+    assert_eq!(bool4096(2048),
+              [false,false,false,false,
+               false,false,false,false,
+               false,false,false,true ]);
+  }
 
   #[wasm_bindgen_test(unsupported = test)]
   fn test_tune() {
