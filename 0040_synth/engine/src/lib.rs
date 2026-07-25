@@ -241,38 +241,6 @@ impl ChordRoot {
 
 }
 
-fn chord_root(pr1: &[bool]) -> Option<usize> {
-  let mut oct = [0usize; 12];
-  let mut low : Option<usize> = None;
-  for i in 0..pr1.len() {
-    if pr1[i] {
-      if low == None {
-        low = Some(i);
-      }
-      oct[ i    %12] += 5;
-      oct[(i+ 5)%12] += 4;
-      oct[(i+ 8)%12] += 3;
-      oct[(i+10)%12] += 2;
-      oct[(i+ 2)%12] += 1;
-    }
-  }
-  let mx = oct.iter().enumerate().fold( (0usize, 0usize, 0usize),
-   |(mx, imx, cnt), (i, &x)| {
-    if x < mx {
-      (mx, imx, cnt)
-    } else if x == mx {
-      (mx, imx, cnt+1)
-    } else {
-      (x, i, 1) 
-    }
-  });
-  if mx.2 == 1 {
-    Some(mx.1)
-  } else {
-    None
-  }
-}
-
 fn tune<C: Cplx>(c: &mut [C], n: isize, f: Flt, t: &[Flt]) {
   let i = (-n).div_euclid(t.len() as isize);
   let mut f0 = f*(2 as Flt).powf(i as Flt);
@@ -696,41 +664,6 @@ mod test_vecreson {
            Cplxpol { mag: 1.0, angle: 1.0  },
            Cplxpol { mag: 1.0, angle: 1.5  },
            Cplxpol { mag: 1.0, angle: 2.0  } ]);
-  }
-
-  #[wasm_bindgen_test(unsupported = test)]
-  fn test_chord_root() {
-    use super::chord_root;
-    assert_eq!(Some(0), chord_root(&[
-     true, // C
-     false, false, false,
-     true, // E
-     false, false,
-     true, // G
-     false, false, false, false]));
-    assert_eq!(Some(5), chord_root(&[
-     true, // C
-     false, false, false, false,
-     true, // F
-     false, false, false,
-     true, // A
-     false, false]));
-    assert_eq!(Some(4), chord_root(&[
-     false, false, false, false,
-     true, // E
-     false, false,
-     true, // G
-     false, false, false,
-     true ])); // B
-    assert_eq!(Some(7), chord_root(&[
-     false, false,
-     true, // D
-     false,
-     true, // E
-     false, false,
-     true, // G
-     false, false, false,
-     true ])); // B
   }
 
   #[wasm_bindgen_test(unsupported = test)]
