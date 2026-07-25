@@ -203,7 +203,7 @@ impl<T> MulAssign<T> for Cplxy where
 
 #[derive(PartialEq, Clone, Debug)]
 struct ChordRoot {
-  //tbl: Vec<Optional<usize>>,
+  tbl: Vec<Option<usize>>,
 }
 
 fn bool4096(mut i: usize) -> [bool; 12] {
@@ -217,11 +217,15 @@ fn bool4096(mut i: usize) -> [bool; 12] {
 
 impl ChordRoot {
 
-  //fn new() -> Self {
-  //  let mut slf = Self {
-  //    tbl: vec![None; 4096],
-  //  }
-  //}
+  fn new() -> Self {
+    let mut slf = Self {
+      tbl: vec![None; 4096],
+    };
+    for i in 0..slf.tbl.len() {
+      slf.tbl[i] = slf.root(&bool4096(i));
+    }
+    slf
+  }
 
   fn root(&self, pr1: &[bool]) -> Option<usize> {
     let mut oct = [0usize; 12];
@@ -411,7 +415,7 @@ impl<C: Cplx> Rsn<C> {
       pr1: vec![false; nk],
       drb: [1.0; 8],
       crt: 12,
-      cr : ChordRoot {},
+      cr : ChordRoot::new(),
       ftb,
     }
   }
@@ -702,7 +706,7 @@ mod test_vecreson {
   #[wasm_bindgen_test(unsupported = test)]
   fn test_chordroot() {
     use super::ChordRoot;
-    let cr = ChordRoot {};
+    let cr = ChordRoot::new();
     assert_eq!(Some(0), cr.root(&[
      true, // C
      false, false, false,
@@ -780,7 +784,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
-      cr : ChordRoot {},
+      cr : ChordRoot::new(),
       ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
                      Cplxpol { mag: 1.0, angle: 0.5  }] ; 13],
     };
@@ -850,7 +854,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
-      cr : ChordRoot {},
+      cr : ChordRoot::new(),
       ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
                      Cplxpol { mag: 1.0, angle: 0.5  }]; 13],
     };
