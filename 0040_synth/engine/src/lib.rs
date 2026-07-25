@@ -201,6 +201,7 @@ impl<T> MulAssign<T> for Cplxy where
   }
 }
 
+#[derive(PartialEq, Clone, Debug)]
 struct ChordRoot {
 }
 
@@ -384,6 +385,7 @@ struct Rsn<C> {
   pr1: Vec<bool>,
   drb: [Flt; 8],
   crt: usize,
+  cr : ChordRoot,
   ftb: Vec<Vec<C>>,
 }
 
@@ -421,6 +423,7 @@ impl<C: Cplx> Rsn<C> {
       pr1: vec![false; nk],
       drb: [1.0; 8],
       crt: 12,
+      cr : ChordRoot {},
       ftb,
     }
   }
@@ -438,7 +441,7 @@ impl<C: Cplx> Rsn<C> {
       }
     }
     self.pr1[i] = true;
-    if let Some(k) = chord_root(&self.pr1) {
+    if let Some(k) = self.cr.root(&self.pr1) {
       self.crt = k;
     } else {
       self.crt = 12;
@@ -795,6 +798,7 @@ mod test_vecreson {
   fn test_rsn() {
     use super::Cplxpol;
     use super::Rsn;
+    use super::ChordRoot;
 
     let mut rsn = Rsn {
       c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
@@ -810,6 +814,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
+      cr : ChordRoot {},
       ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
                      Cplxpol { mag: 1.0, angle: 0.5  }] ; 13],
     };
@@ -863,6 +868,7 @@ mod test_vecreson {
   fn test_rsn_harm() {
     use super::Cplxpol;
     use super::Rsn;
+    use super::ChordRoot;
 
     let mut rsn = Rsn {
       c  : vec![Cplxpol { mag: 0.25, angle: 0.25 },
@@ -878,6 +884,7 @@ mod test_vecreson {
       pr1: vec![false, false],
       drb: [1.0; 8],
       crt: 0,
+      cr : ChordRoot {},
       ftb: vec![vec![Cplxpol { mag: 1.0, angle: 0.25 },
                      Cplxpol { mag: 1.0, angle: 0.5  }]; 13],
     };
