@@ -222,12 +222,12 @@ impl ChordRoot {
       tbl: vec![None; 4096],
     };
     for i in 0..slf.tbl.len() {
-      slf.tbl[i] = slf.root(&bool4096(i));
+      slf.tbl[i] = slf.root_precalc(&bool4096(i));
     }
     slf
   }
 
-  fn root(&self, pr1: &[bool]) -> Option<usize> {
+  fn root_precalc(&self, pr1: &[bool]) -> Option<usize> {
     let mut oct = [0usize; 12];
     let mut pror = [false; 12];
     let mut low : Option<usize> = None;
@@ -261,6 +261,16 @@ impl ChordRoot {
     } else {
       None
     }
+  }
+
+  fn root(&self, pr1: &[bool]) -> Option<usize> {
+    let mut x = 0;
+    for i in 0..pr1.len() {
+      if pr1[i] {
+        x |= 1 << (i%12);
+      }
+    }
+    self.tbl[x]
   }
 
 }
