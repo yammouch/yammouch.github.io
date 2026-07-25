@@ -731,6 +731,42 @@ mod test_vecreson {
   }
 
   #[wasm_bindgen_test(unsupported = test)]
+  fn test_chordroot() {
+    use super::ChordRoot;
+    let cr = ChordRoot {};
+    assert_eq!(Some(0), cr.root(&[
+     true, // C
+     false, false, false,
+     true, // E
+     false, false,
+     true, // G
+     false, false, false, false]));
+    assert_eq!(Some(5), cr.root(&[
+     true, // C
+     false, false, false, false,
+     true, // F
+     false, false, false,
+     true, // A
+     false, false]));
+    assert_eq!(Some(4), cr.root(&[
+     false, false, false, false,
+     true, // E
+     false, false,
+     true, // G
+     false, false, false,
+     true ])); // B
+    assert_eq!(Some(7), cr.root(&[
+     false, false,
+     true, // D
+     false,
+     true, // E
+     false, false,
+     true, // G
+     false, false, false,
+     true ])); // B
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
   fn test_k2r() {
     let rv = super::k2r(13, &[0]);
     assert_eq!(rv,
