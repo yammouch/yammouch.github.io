@@ -313,19 +313,19 @@ fn tune<C: Cplx>(c: &mut [C], n: isize, f: Flt, t: &[Flt]) {
   }
 }
 
-const JUST_TABLE : [Flt; 12] = [
-  1.0,
- 17.0/16.0,
-  9.0/ 8.0,
-  6.0/ 5.0, //  7.0/ 6.0
-  5.0/ 4.0,
- 27.0/20.0, //  4.0/ 3.0
- 45.0/32.0, // 11.0/ 8.0
-  3.0/ 2.0,
- 25.0/16.0, //  8.0/ 5.0
- 27.0/16.0, //  5.0/ 3.0
-  9.0/ 5.0, //  7.0/ 4.0
- 15.0/ 8.0,
+const JUST_TABLE : [(u16, u16); 12] = [
+ ( 1,  1),
+ (17, 16),
+ ( 9,  8),
+ ( 6,  5), //  ( 7,  6)
+ ( 5,  4),
+ (27, 20), //  ( 4,  3)
+ (45, 32), //  (11,  8)
+ ( 3,  2),
+ (25, 16), //  ( 8,  5)
+ (27, 16), //  ( 5,  3)
+ ( 9,  5), //  ( 7,  4)
+ (15,  8),
 ];
 
 type Cpl = Cplxy;
@@ -431,12 +431,14 @@ impl<C: Cplx> Rsn<C> {
      (2 as Flt).powf((i as Flt)/12.)
     ).collect::<Vec<_>>();
     tune(&mut ftb[12], apos, tau * f_master_a, &eqt);
+    let jt : Vec<Flt> = JUST_TABLE.iter().map( |&(n, d)| n as Flt/d as Flt )
+                        .collect();
     for i in 0..12 {
       tune(
        &mut ftb[(i+apos-9).rem_euclid(12) as usize],
        apos-9+i as isize,
        pi * f_master_a * (2 as Flt).powf(((i+3) as Flt)/12.),
-       &JUST_TABLE);
+       &jt);
     }
     Self {
       c  : vec![C::from_magangle(1. - 1e-2, 0.0); nk+mx],
