@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, RemAssign};
 use std::marker::PhantomData;
 
 #[wasm_bindgen]
@@ -213,6 +213,21 @@ fn bool4096(mut i: usize) -> [bool; 12] {
     i >>= 1;
   }
   rv
+}
+
+fn gcd2<T>(mut a: T, mut b: T) -> T where
+ T: PartialOrd + RemAssign + From<u8> + Copy
+{
+  loop {
+    if a == T::from(0) {
+      return b;
+    }
+    b %= a;
+    if b == T::from(0) {
+      return a;
+    }
+    a %= b;
+  }
 }
 
 impl ChordRoot {
@@ -677,6 +692,22 @@ mod test_vecreson {
               [false,false,false,false,
                false,false,false,false,
                false,false,false,true ]);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn gcd2() {
+    use super::gcd2;
+    assert_eq!(gcd2(0, 0), 0);
+    assert_eq!(gcd2(0, 1), 1);
+    assert_eq!(gcd2(1, 0), 1);
+    assert_eq!(gcd2(1, 1), 1);
+    assert_eq!(gcd2(6, 3), 3);
+    assert_eq!(gcd2(3, 6), 3);
+    assert_eq!(gcd2(6, 2), 2);
+    assert_eq!(gcd2(2, 6), 2);
+    assert_eq!(gcd2(120, 25), 5);
+    assert_eq!(gcd2(18, 48), 6);
+    assert_eq!(gcd2(45, 32), 1);
   }
 
   #[wasm_bindgen_test(unsupported = test)]
