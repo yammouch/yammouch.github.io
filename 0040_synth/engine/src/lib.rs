@@ -239,6 +239,12 @@ fn lcm2<T>(a: T, b: T) -> T where
   rv
 }
 
+fn dissonance<'a>(it: impl Iterator<Item=&'a bool>) -> u64 {
+  JUST_TABLE.iter().zip(it).filter_map( |(&(_, d), &b)|
+    if b { Some(d as u64) } else { None }
+  ).reduce(lcm2).unwrap()
+}
+
 impl ChordRoot {
 
   fn new() -> Self {
@@ -734,6 +740,14 @@ mod test_vecreson {
     assert_eq!(lcm2(120, 25), 600);
     assert_eq!(lcm2(18, 48), 144);
     assert_eq!(lcm2(45, 32), 1440);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn dissonance() {
+    use super::dissonance;
+    assert_eq!(dissonance([true, false, true].iter()), 8);
+    assert_eq!(dissonance([true, false, false, true].iter()), 5);
+    assert_eq!(dissonance([false, false, true, false, true].iter()), 8);
   }
 
   #[wasm_bindgen_test(unsupported = test)]
