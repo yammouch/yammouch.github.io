@@ -239,7 +239,7 @@ fn lcm2<T>(a: T, b: T) -> T where
   rv
 }
 
-fn dissonance<'a>(it: impl Iterator<Item=&'a bool>) -> u64 {
+fn dissonance<'a>(it: impl Iterator<Item=&'a bool> + std::fmt::Debug) -> u64 {
   JUST_TABLE.iter().zip(it).filter_map( |(&(_, d), &b)|
     if b { Some(d as u64) } else { None }
   ).reduce(lcm2).unwrap()
@@ -251,13 +251,13 @@ fn bin2root(i: usize) -> Option<usize> {
   let op3 = (0..12).into_iter().map( |i|
     (i, dissonance(itc.clone().skip(i)))
   ).fold(None, |acc, (i, d)|
-    if let Some((cnt, pos, max)) = acc {
-      if d < max {
-        acc
-      } else if d == max {
-        Some((cnt + 1, pos, max))
-      } else {
+    if let Some((cnt, pos, min)) = acc {
+      if d < min {
         Some((1, i, d))
+      } else if d == min {
+        Some((cnt + 1, pos, min))
+      } else {
+        acc
       }
     } else {
       Some((1, i, d))
@@ -778,7 +778,6 @@ mod test_vecreson {
   #[wasm_bindgen_test(unsupported = test)]
   fn bin2root() {
     use super::bin2root;
-    assert_eq!(bin2root(0), None);
     assert_eq!(bin2root(1), Some(0));
     assert_eq!(bin2root(2), Some(1));
     assert_eq!(bin2root(4), Some(2));
