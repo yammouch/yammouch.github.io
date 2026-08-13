@@ -4,7 +4,6 @@ class TextDecoder{ decode() {} }
 
 export class Source {
     static __wrap(ptr) {
-        ptr = ptr >>> 0;
         const obj = Object.create(Source.prototype);
         obj.__wbg_ptr = ptr;
         SourceFinalization.register(obj, obj.__wbg_ptr, obj);
@@ -71,11 +70,10 @@ export class Source {
     }
 }
 if (Symbol.dispose) Source.prototype[Symbol.dispose] = Source.prototype.free;
-
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
-        __wbg___wbindgen_throw_be289d5034ed271b: function(arg0, arg1) {
+        __wbg___wbindgen_throw_344f42d3211c4765: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
         },
         __wbindgen_init_externref_table: function() {
@@ -96,11 +94,10 @@ function __wbg_get_imports() {
 
 const SourceFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_source_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_source_free(ptr, 1));
 
 function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return decodeText(ptr, len);
+    return decodeText(ptr >>> 0, len);
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -125,8 +122,9 @@ function decodeText(ptr, len) {
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
-let wasmModule, wasm;
+let wasmModule, wasmInstance, wasm;
 function __wbg_finalize_init(instance, module) {
+    wasmInstance = instance;
     wasm = instance.exports;
     wasmModule = module;
     cachedUint8ArrayMemory0 = null;

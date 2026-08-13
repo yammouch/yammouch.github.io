@@ -245,6 +245,31 @@ fn dissonance<'a>(it: impl Iterator<Item=&'a bool>) -> u64 {
   ).reduce(lcm2).unwrap()
 }
 
+fn bin2root(i: usize) -> Option<usize> {
+  let ar = bool4096(i);
+  let itc = ar.iter().cycle();
+  let op3 = (0..12).into_iter().map( |i|
+    (i, dissonance(itc.clone().skip(i)))
+  ).fold(None, |acc, (i, d)|
+    if let Some((cnt, pos, max)) = acc {
+      if d < max {
+        acc
+      } else if d == max {
+        Some((cnt + 1, pos, max))
+      } else {
+        Some((1, i, d))
+      }
+    } else {
+      Some((1, i, d))
+    }
+  );
+  match op3 {
+    None => None,
+    Some((1, pos, _)) => Some(pos),
+    _ => None,
+  }
+}
+
 impl ChordRoot {
 
   fn new() -> Self {
@@ -748,6 +773,16 @@ mod test_vecreson {
     assert_eq!(dissonance([true, false, true].iter()), 8);
     assert_eq!(dissonance([true, false, false, true].iter()), 5);
     assert_eq!(dissonance([false, false, true, false, true].iter()), 8);
+  }
+
+  #[wasm_bindgen_test(unsupported = test)]
+  fn bin2root() {
+    use super::bin2root;
+    assert_eq!(bin2root(0), None);
+    assert_eq!(bin2root(1), Some(0));
+    assert_eq!(bin2root(2), Some(1));
+    assert_eq!(bin2root(4), Some(2));
+    assert_eq!(bin2root((1 << 2) | (1 << 5) | (1 << 10)), Some(10));
   }
 
   #[wasm_bindgen_test(unsupported = test)]
