@@ -9,6 +9,7 @@ const updown2onoff = new UpDown2OnOff();
 
 let audioContext;
 let squareNode = null;
+let evq;
 
 window.addEventListener("load", () => {
   audioContext = new AudioContext();
@@ -182,11 +183,13 @@ async function play() {
     chord_root.innerText = "chord root: " + e.data.chord_root;
   };
   drawbar(squareNode.port);
+  evq = new SharedArrayBuffer(1024);
   squareNode.port.postMessage({
    cmd       : "init",
    sampleRate: audioContext.sampleRate,
    master    : 440,
-   wasm      : wasm });
+   wasm      : wasm,
+   evq       : evq });
   await setupMIDI();
 }
 
