@@ -180,7 +180,9 @@ async function play() {
   }
   squareNode.connect(audioContext.destination);
   squareNode.port.onmessage = (e) => {
-    chord_root.innerText = "chord root: " + e.data.chord_root;
+    if (Object.hasOwn(e.data, 'chord_root')) {
+      chord_root.innerText = "chord root: " + e.data.chord_root;
+    }
   };
   drawbar(squareNode.port);
   evq = new SharedArrayBuffer(1024);

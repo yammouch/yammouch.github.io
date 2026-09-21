@@ -20,6 +20,8 @@ export class SquareProcessor extends AudioWorkletProcessor {
       } else if (e.data.cmd == "harm") {
         console.log(e.data);
         this.src.harm(e.data.harm, e.data.value*0.125);
+      } else if (e.data.cmd == "evq_get") {
+        this.port.postMessage( {i: e.data.i, val: this.evq[i]} );
       }
     };
   }
