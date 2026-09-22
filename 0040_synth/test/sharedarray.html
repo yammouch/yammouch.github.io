@@ -56,6 +56,11 @@ window.addEventListener("load", () => {
   });
   play().then( () => {
     squareNode.port.postMessage({ cmd: "evq_get", i: 0 });
+    setTimeout(() => {
+      const view = new Uint32Array(evq);
+      view[0] = 1234567890;
+      squareNode.port.postMessage({ cmd: "evq_get", i: 0 });
+    }, 100);
   });
 });
 
