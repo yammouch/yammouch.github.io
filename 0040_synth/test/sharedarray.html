@@ -3,7 +3,7 @@
 <head>
 <script type="module">
 
-import { UpDown2OnOff } from "./updown2onoff.js";
+import { UpDown2OnOff } from "../updown2onoff.js";
 
 const updown2onoff = new UpDown2OnOff();
 
@@ -164,7 +164,7 @@ async function setupMIDI() {
 }
 
 async function play() {
-  await audioContext.audioWorklet.addModule("keyon.js");
+  await audioContext.audioWorklet.addModule("../keyon.js");
   console.log("keyon");
   const chord_root = document.getElementById("chord_root");
   squareNode = new AudioWorkletNode(
@@ -172,7 +172,7 @@ async function play() {
     "sq-pr",
   );
   let wasm = null;
-  const resp = await fetch("./engine/pkg/reson_bg.wasm");
+  const resp = await fetch("../engine/pkg/reson_bg.wasm");
   if (resp.ok) {
     wasm = await resp.arrayBuffer();
   } else {
