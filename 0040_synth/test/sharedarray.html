@@ -14,7 +14,13 @@ window.addEventListener("load", () => {
     setTimeout(() => {
       const view = new Uint32Array(evq);
       view[0] = 1234567890;
+      Atomics.store(view,  1, 3333333333);
+      Atomics.store(view, 32, 5);
+      Atomics.store(view, 33, 7);
       squareNode.port.postMessage({ cmd: "evq_get", i: 0 });
+      squareNode.port.postMessage({ cmd: "evq_get", i: 1 });
+      squareNode.port.postMessage({ cmd: "evq_wptr" });
+      squareNode.port.postMessage({ cmd: "evq_rptr" });
     }, 100);
   });
 });
@@ -35,7 +41,7 @@ async function play() {
   let shared_test = document.getElementById("shared_test");
   squareNode.connect(audioContext.destination);
   squareNode.port.onmessage = (e) => {
-    shared_test.innerText = e.data.i + " " + e.data.val;
+    shared_test.innerText += e.data.i + " " + e.data.val + "\n";
   };
   evq = new SharedArrayBuffer(1024);
   squareNode.port.postMessage({
@@ -43,7 +49,10 @@ async function play() {
    sampleRate: audioContext.sampleRate,
    master    : 440,
    wasm      : wasm,
-   evq       : evq });
+   evq       : { data: new Uint32Array(evq,   0, 32),
+                 wptr: new Uint32Array(evq, 128,  1),
+                 rptr: new Uint32Array(evq, 132,  1) }
+  });
 }
 
 </script>
