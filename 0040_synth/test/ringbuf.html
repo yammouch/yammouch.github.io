@@ -5,9 +5,15 @@
 
 import { RingBuf } from "../ringbuf.js";
 
-let i01 = new RingBuf(0);
-
+let d = document.getElementById("shared_test");
+let i01 = new RingBuf(4);
 console.log(i01);
+i01.push(2);
+i01.push(4);
+d.innerText += "\n" + i01.pop();
+d.innerText += "\n" + i01.pop();
+d.innerText += "\n" + i01.pop();
+d.innerText += "\n" + i01.pop();
 
 </script>
 </head>
