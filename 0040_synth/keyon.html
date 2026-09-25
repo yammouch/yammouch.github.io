@@ -4,6 +4,7 @@
 <script type="module">
 
 import { UpDown2OnOff } from "./updown2onoff.js";
+import { RingBuf } from "./ringbuf.js";
 
 const updown2onoff = new UpDown2OnOff();
 
@@ -185,7 +186,7 @@ async function play() {
     }
   };
   drawbar(squareNode.port);
-  evq = new SharedArrayBuffer(1024);
+  evq = new RingBuf(1024);
   squareNode.port.postMessage({
    cmd       : "init",
    sampleRate: audioContext.sampleRate,
