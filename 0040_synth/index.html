@@ -3,8 +3,7 @@
  <head>
   <script src="./node_modules/plotly.js-dist/plotly.js" charset="utf-8"></script>
   <script type="module">
-   import { initSync, Source } from './node_modules/wasm_engine/reson.js';
-   //import { initSync, Source } from './sub01.js';
+   import { initSync, Source } from './engine/pkg/glue.js';
    const audioContext = new AudioContext();
 
    // refer to:
@@ -40,11 +39,11 @@
    }
 
    async function main() {
-     const resp = await fetch("./node_modules/wasm_engine/reson_bg.wasm");
+     const resp = await fetch("./engine/pkg/reson_bg.wasm");
      const buf = await resp.arrayBuffer();
      const wasm = initSync(buf);
      const sr = audioContext.sampleRate;
-     const sound_src = Source.new(440.0/sr);
+     const sound_src = Source.new(41, 440.0/sr, 33);
      sound_src.on(19);
      sound_src.on(26);
      sound_src.on(35);
