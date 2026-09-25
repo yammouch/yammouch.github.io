@@ -7,6 +7,16 @@
    const audioContext = new AudioContext();
 
    globalThis.AudioWorkletProcessor = class {
+     constructor() {
+       this.port = {
+         postMessage: (data) => {
+           if (typeof this.port.onmessage === 'function') {
+             this.port.onmessage({data});
+           }
+         },
+         onmessage: null,
+       };
+     }
    };
 
    globalThis.registerProcessor = () => {};
@@ -51,6 +61,13 @@
      const wasm = initSync(buf);
      const sr = audioContext.sampleRate;
      const sound_src = Source.new(41, 440.0/sr, 33);
+     const sound_src_new = new SquareProcessor();
+     sound_src_new.port.postMessage({
+      cmd       : "init",
+      sampleRate: audioContext.sampleRate,
+      master    : 440,
+      wasm      : wasm
+     });
      sound_src.on(19);
      sound_src.on(26);
      sound_src.on(35);
