@@ -6,6 +6,13 @@
    import { initSync, Source } from '../engine/pkg/glue.js';
    const audioContext = new AudioContext();
 
+   globalThis.AudioWorkletProcessor = class {
+   };
+
+   globalThis.registerProcessor = () => {};
+
+   const { SquareProcessor } = await import('../keyon.js');
+
    // refer to:
    // https://www.youfit.co.jp/archives/1418
    // https://qiita.com/optimisuke/items/f1434d4a46afd667adc6
