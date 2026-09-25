@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
  <head>
-  <script src="./node_modules/plotly.js-dist/plotly.js" charset="utf-8"></script>
+  <script src="../node_modules/plotly.js-dist/plotly.js" charset="utf-8"></script>
   <script type="module">
-   import { initSync, Source } from './engine/pkg/glue.js';
+   import { initSync, Source } from '../engine/pkg/glue.js';
    const audioContext = new AudioContext();
 
    // refer to:
@@ -39,7 +39,7 @@
    }
 
    async function main() {
-     const resp = await fetch("./engine/pkg/reson_bg.wasm");
+     const resp = await fetch("../engine/pkg/reson_bg.wasm");
      const buf = await resp.arrayBuffer();
      const wasm = initSync(buf);
      const sr = audioContext.sampleRate;
