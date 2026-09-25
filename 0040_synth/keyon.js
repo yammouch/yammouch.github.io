@@ -1,4 +1,5 @@
 import { initSync, Source } from "./engine/pkg/glue.js";
+import { RingBuf } from "./ringbuf.js";
 
 export class SquareProcessor extends AudioWorkletProcessor {
 
@@ -16,7 +17,8 @@ export class SquareProcessor extends AudioWorkletProcessor {
       } else if (e.data.cmd == "init") {
         this.wasm = initSync(e.data.wasm);
         this.src = Source.new(128, e.data.master / e.data.sampleRate, 69);
-        this.evq = e.data.evq;
+        let evq = e.data.evq;
+        this.evq = new RingBuf(evq.data, evq.wptr, evq.rptr);
       } else if (e.data.cmd == "harm") {
         console.log(e.data);
         this.src.harm(e.data.harm, e.data.value*0.125);

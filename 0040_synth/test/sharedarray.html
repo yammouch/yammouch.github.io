@@ -3,6 +3,8 @@
 <head>
 <script type="module">
 
+import { RingBuf } from '../ringbuf.js';
+
 let audioContext;
 let squareNode = null;
 let evq;
@@ -13,10 +15,10 @@ window.addEventListener("load", () => {
     squareNode.port.postMessage({ cmd: "evq_get", i: 0 });
     setTimeout(() => {
       const view = new Uint32Array(evq);
-      view[0] = 1234567890;
-      Atomics.store(view,  1, 3333333333);
-      Atomics.store(view, 32, 5);
-      Atomics.store(view, 33, 7);
+      evq.data[0] = 1234567890;
+      Atomics.store(evq.data, 1, 3333333333);
+      Atomics.store(evq.wptr, 0, 5);
+      Atomics.store(evq.rptr, 0, 7);
       squareNode.port.postMessage({ cmd: "evq_get", i: 0 });
       squareNode.port.postMessage({ cmd: "evq_get", i: 1 });
       squareNode.port.postMessage({ cmd: "evq_wptr" });
@@ -43,15 +45,13 @@ async function play() {
   squareNode.port.onmessage = (e) => {
     shared_test.innerText += e.data.i + " " + e.data.val + "\n";
   };
-  evq = new SharedArrayBuffer(1024);
+  evq = new RingBuf(32);
   squareNode.port.postMessage({
    cmd       : "init",
    sampleRate: audioContext.sampleRate,
    master    : 440,
    wasm      : wasm,
-   evq       : { data: new Uint32Array(evq,   0, 32),
-                 wptr: new Uint32Array(evq, 128,  1),
-                 rptr: new Uint32Array(evq, 132,  1) }
+   evq       : evq,
   });
 }
 

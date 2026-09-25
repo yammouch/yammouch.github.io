@@ -3,6 +3,8 @@
  <head>
   <script src="../node_modules/plotly.js-dist/plotly.js" charset="utf-8"></script>
   <script type="module">
+   import { RingBuf } from '../ringbuf.js';
+
    const audioContext = new AudioContext();
 
    globalThis.AudioWorkletProcessor = class {
@@ -59,11 +61,13 @@
      const wasm = await resp.arrayBuffer();
      const sr = audioContext.sampleRate;
      const sound_src_new = new SquareProcessor();
+     const evq = new RingBuf(8);
      sound_src_new.port.postMessage({
       cmd       : "init",
       sampleRate: sr,
       master    : 440,
-      wasm      : wasm
+      wasm      : wasm,
+      evq       : evq,
      });
      sound_src_new.port.postMessage({cmd: "on", note: 55});
      sound_src_new.port.postMessage({cmd: "on", note: 62});
