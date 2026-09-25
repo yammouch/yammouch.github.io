@@ -36,7 +36,7 @@ window.addEventListener("load", () => {
     console.log(on);
     if (on) {
       console.log(code);
-      squareNode.port.postMessage(on);
+      evq.push(0x00900000 | on.note << 8);
     }
   });
   document.addEventListener("keyup", (e) => {
@@ -53,6 +53,7 @@ window.addEventListener("load", () => {
     let off = updown2onoff.off(code);
     if (off) {
       squareNode.port.postMessage(off);
+      evq.push(0x00800000 | off.note << 8);
     }
   });
   play();
