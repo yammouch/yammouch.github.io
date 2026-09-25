@@ -1,6 +1,6 @@
 import { initSync, Source } from "./engine/pkg/glue.js";
 
-class SquareProcessor extends AudioWorkletProcessor {
+export class SquareProcessor extends AudioWorkletProcessor {
 
   constructor() {
     super();
