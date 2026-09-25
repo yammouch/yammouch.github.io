@@ -69,9 +69,9 @@
       wasm      : wasm,
       evq       : evq,
      });
-     sound_src_new.port.postMessage({cmd: "on", note: 55});
-     sound_src_new.port.postMessage({cmd: "on", note: 62});
-     sound_src_new.port.postMessage({cmd: "on", note: 71});
+     evq.push(0x00903700);
+     evq.push(0x00903e00);
+     evq.push(0x00904700);
      let y = new Float32Array(sr);
 
      sound_src_new.process([], [[y]], []);

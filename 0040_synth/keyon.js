@@ -37,6 +37,14 @@ export class SquareProcessor extends AudioWorkletProcessor {
     const output = outputs[0];
     const channel = output[0];
 
+    for (let msg = this.evq.pop(); msg !== null; msg = this.evq.pop()) {
+      if ((msg & 0x00f00000) === 0x00800000) {
+        this.src.off((msg >> 8) & 0xff);
+      } else if ((msg & 0x00f00000) === 0x00900000) {
+        this.src.on((msg >> 8) & 0xff);
+      }
+    }
+
     this.src.tick(channel.length);
     const out_ptr = this.src.ptr();
     const f32view = new Float32Array(
