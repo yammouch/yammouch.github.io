@@ -134,8 +134,10 @@ function drawbar(port) {
 }
 
 function onMIDIMessage(e) {
-  console.log(e.data);
-  evq.push((e.data[0] << 16) | (e.data[1] << 8) | e.data[2]);
+  //console.log(e.data);
+  if ((e.data[0] & 0xf0) === 0x80 || (e.data[0] & 0xf0) === 0x90) {
+    evq.push((e.data[0] << 16) | (e.data[1] << 8) | e.data[2]);
+  }
 }
 
 async function setupMIDI() {
